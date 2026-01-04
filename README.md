@@ -287,6 +287,25 @@ This is a production-ready application. When extending:
 
 This project is private and proprietary.
 
+## 📚 Documentation
+
+Comprehensive documentation is available in the `documentation/` directory:
+
+### Standards
+- **[CODING_STANDARDS.md](./documentation/standards/CODING_STANDARDS.md)** - Coding standards and best practices
+
+### Architecture
+- **[SYSTEM_ARCHITECTURE.md](./documentation/architecture/SYSTEM_ARCHITECTURE.md)** - System architecture and design
+
+### Guides
+- **[COMPONENT_GUIDE.md](./documentation/guides/COMPONENT_GUIDE.md)** - Component development guide
+- **[QUICK_REFERENCE.md](./documentation/guides/QUICK_REFERENCE.md)** - Quick reference guide
+
+### Documentation Index
+- **[README.md](./documentation/README.md)** - Complete documentation index
+
+**All developers must read and follow the standards outlined in the documentation.**
+
 ## 🎉 Version
 
 **Current Version: 1.0.0**

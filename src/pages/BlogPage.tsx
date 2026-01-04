@@ -6,16 +6,31 @@
  * - Voting (if enabled)
  * - Social Share (if enabled)
  * - Tags and metadata
+ * - Sidebar with TOC and metadata
  */
 
 import { useParams, Link } from "react-router-dom";
 import type { Blog } from "@/types/blog";
 import { BlogRenderer } from "@/components/blog/BlogRenderer";
 import { Voting } from "@/components/blog/Voting";
-import { SocialShare } from "@/components/blog/SocialShare";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
+import {
+  SidebarInset,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Calendar, Clock, User, X, Star } from "lucide-react";
+import { useFavorites } from "@/hooks/useFavorites";
 
 interface BlogPageProps {
   blog: Blog | null;
@@ -24,11 +39,28 @@ interface BlogPageProps {
 
 export function BlogPage({ blog, onVote }: BlogPageProps) {
   const { blogId } = useParams<{ blogId: string }>();
+  const { open, toggleSidebar } = useSidebar();
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   const handleVote = (vote: "upvote" | "downvote") => {
     if (onVote && blogId) {
       onVote(blogId, vote);
     }
+  };
+
+  const handleFavoriteToggle = () => {
+    if (blogId) {
+      toggleFavorite(blogId);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   if (!blog) {
@@ -47,25 +79,42 @@ export function BlogPage({ blog, onVote }: BlogPageProps) {
     );
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Navigation */}
-        <Link to="/">
-          <Button variant="ghost" className="mb-6">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
+    <SidebarInset>
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+        {!open ? (
+          <SidebarTrigger className="-ml-1" aria-label="Open sidebar" />
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 -ml-1"
+            onClick={toggleSidebar}
+            aria-label="Close sidebar"
+          >
+            <X className="h-4 w-4" />
           </Button>
-        </Link>
+        )}
+        <Separator
+          orientation="vertical"
+          className="mr-2 data-[orientation=vertical]:h-4"
+        />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink asChild>
+                <Link to="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{blog.meta.title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </header>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
 
         {/* Cover Image */}
         {blog.meta.coverImage && (
@@ -80,7 +129,26 @@ export function BlogPage({ blog, onVote }: BlogPageProps) {
 
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{blog.meta.title}</h1>
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold flex-1">{blog.meta.title}</h1>
+            {blogId && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleFavoriteToggle}
+                aria-label={isFavorite(blogId) ? "Remove from favorites" : "Add to favorites"}
+                className="shrink-0"
+              >
+                <Star
+                  className={`h-5 w-5 ${
+                    isFavorite(blogId)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-muted-foreground"
+                  }`}
+                />
+              </Button>
+            )}
+          </div>
           <p className="text-xl text-muted-foreground mb-6">{blog.meta.description}</p>
 
           {/* Meta Information */}
@@ -138,16 +206,9 @@ export function BlogPage({ blog, onVote }: BlogPageProps) {
           <BlogRenderer blog={blog} />
         </div>
 
-        {/* Social Share */}
-        {blog.settings.enableSocialShare && (
-          <SocialShare
-            socialShare={blog.socialShare}
-            url={window.location.href}
-            title={blog.meta.title}
-          />
-        )}
+        </div>
       </div>
-    </div>
+    </SidebarInset>
   );
 }
 
