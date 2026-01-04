@@ -7,8 +7,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HomePage } from "@/pages/HomePage";
 import { BlogPageWrapper } from "@/components/BlogPageWrapper";
+import { CalendarPage } from "@/pages/CalendarPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 import { getBlogPreviews } from "@/data/mockBlogs";
 import { useState } from "react";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 function App() {
   const [blogs] = useState(getBlogPreviews());
@@ -24,7 +27,27 @@ function App() {
         <Route path="/" element={<HomePage blogs={blogs} />} />
         <Route
           path="/blog/:blogId"
-          element={<BlogPageWrapper onVote={handleVote} />}
+          element={
+            <SidebarProvider defaultOpen={false}>
+              <BlogPageWrapper onVote={handleVote} blogs={blogs} />
+            </SidebarProvider>
+          }
+        />
+        <Route
+          path="/calendar"
+          element={
+            <SidebarProvider defaultOpen={false}>
+              <CalendarPage blogs={blogs} />
+            </SidebarProvider>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <SidebarProvider defaultOpen={false}>
+              <SettingsPage blogs={blogs} />
+            </SidebarProvider>
+          }
         />
       </Routes>
     </BrowserRouter>
