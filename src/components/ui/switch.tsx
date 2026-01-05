@@ -19,9 +19,7 @@ const Switch = React.forwardRef<
     } else if (ref) {
       return (node: React.ElementRef<typeof SwitchPrimitives.Root>) => {
         internalRef.current = node
-        if (ref.current !== null) {
-          ;(ref as React.MutableRefObject<React.ElementRef<typeof SwitchPrimitives.Root> | null>).current = node
-        }
+        ;(ref as React.MutableRefObject<React.ElementRef<typeof SwitchPrimitives.Root> | null>).current = node
       }
     }
     return (node: React.ElementRef<typeof SwitchPrimitives.Root>) => {

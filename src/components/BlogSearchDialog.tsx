@@ -129,7 +129,7 @@ export function BlogSearchDialog({ blogs }: BlogSearchDialogProps) {
           break;
       }
     },
-    [filteredBlogs, activeIndex, closeSearch]
+    [filteredBlogs, activeIndex, closeSearch, navigate]
   );
 
   const formatDate = (dateString: string) => {

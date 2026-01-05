@@ -232,10 +232,13 @@ const Sidebar = React.forwardRef<
       const handleClickOutside = (event: MouseEvent) => {
         const target = event.target as Node;
         
-        // Don't close if clicking on dropdown menu (Radix Portal)
-        const dropdownMenu = document.querySelector('[role="menu"][data-radix-dropdown-menu-content]');
-        if (dropdownMenu && (dropdownMenu.contains(target) || dropdownMenu === target)) {
-          return;
+        // Don't close if clicking on any dropdown menu (Radix Portal)
+        // Check all dropdown menus, not just the first one
+        const dropdownMenus = document.querySelectorAll('[role="menu"][data-radix-dropdown-menu-content]');
+        for (const dropdownMenu of dropdownMenus) {
+          if (dropdownMenu.contains(target) || dropdownMenu === target) {
+            return;
+          }
         }
         
         // Don't close if clicking on dropdown trigger or any element within a dropdown
@@ -272,9 +275,17 @@ const Sidebar = React.forwardRef<
               isCollapsedOffcanvas ? "opacity-0 pointer-events-none" : "opacity-100"
             )}
             onClick={(e) => {
-              // Don't close if clicking on dropdown menu
+              // Don't close if clicking on any dropdown menu
               const target = e.target as HTMLElement;
-              if (target.closest('[data-radix-dropdown-menu-content]') || 
+              // Check all dropdown menus
+              const dropdownMenus = document.querySelectorAll('[role="menu"][data-radix-dropdown-menu-content]');
+              for (const dropdownMenu of dropdownMenus) {
+                if (dropdownMenu.contains(target) || dropdownMenu === target) {
+                  return;
+                }
+              }
+              if (target.closest('[data-radix-dropdown-menu-trigger]') || 
+                  target.closest('[data-radix-dropdown-menu-content]') ||
                   target.closest('[role="menu"]')) {
                 return;
               }

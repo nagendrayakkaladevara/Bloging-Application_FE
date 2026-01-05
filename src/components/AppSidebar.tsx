@@ -140,7 +140,7 @@ export function AppSidebar({ blogs, ...props }: AppSidebarProps) {
         <NavMain items={navMain} />
       </SidebarHeader>
       <SidebarContent>
-        <NavFavorites favorites={favorites} />
+        {favorites.length > 0 && <NavFavorites favorites={favorites} />}
         {workspaces.length > 0 && <NavWorkspaces workspaces={workspaces} className="-mt-2" />}
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>

@@ -105,11 +105,6 @@ export function NavFavorites({
   const displayedFavorites = favorites.slice(0, 5);
   const hasMore = favorites.length > 5;
 
-  // Don't render if no favorites
-  if (favorites.length === 0) {
-    return null;
-  }
-
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Favorites</SidebarGroupLabel>
