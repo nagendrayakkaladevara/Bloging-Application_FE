@@ -31,7 +31,7 @@ export function Hero() {
 
   return (
     <motion.div 
-      className="min-h-screen flex items-center justify-center px-6 py-20 relative overflow-hidden"
+      className="h-[calc(100vh-3.5rem)] flex items-center justify-center px-6 py-20 relative overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}

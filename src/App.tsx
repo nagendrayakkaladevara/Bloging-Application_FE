@@ -10,6 +10,7 @@ import { BlogPageWrapper } from "@/components/BlogPageWrapper";
 import { CalendarPage } from "@/pages/CalendarPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { HelpPage } from "@/pages/HelpPage";
+import { AskAIPage } from "@/pages/AskAIPage";
 import { getBlogPreviews } from "@/data/mockBlogs";
 import { useState, useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -50,7 +51,14 @@ function App() {
       <GlobalKeyboardShortcuts />
       <BlogSearchDialog blogs={blogs} />
       <Routes>
-        <Route path="/" element={<HomePage blogs={blogs} />} />
+        <Route
+          path="/"
+          element={
+            <SidebarProvider defaultOpen={false}>
+              <HomePage blogs={blogs} />
+            </SidebarProvider>
+          }
+        />
         <Route
           path="/blog/:blogId"
           element={
@@ -80,6 +88,14 @@ function App() {
           element={
             <SidebarProvider defaultOpen={false}>
               <HelpPage blogs={blogs} />
+            </SidebarProvider>
+          }
+        />
+        <Route
+          path="/ask-ai"
+          element={
+            <SidebarProvider defaultOpen={false}>
+              <AskAIPage blogs={blogs} />
             </SidebarProvider>
           }
         />

@@ -90,8 +90,9 @@ export function AppSidebar({ blogs, ...props }: AppSidebarProps) {
     },
     {
       title: "Ask AI",
-      url: "#",
+      url: "/ask-ai",
       icon: Sparkles,
+      isActive: location.pathname === "/ask-ai",
       badge: "Coming soon",
     },
     {
@@ -144,7 +145,7 @@ export function AppSidebar({ blogs, ...props }: AppSidebarProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-2 top-2 h-8 w-8 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className="absolute right-2 top-2 z-50 h-8 w-8 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             onClick={() => setOpenMobile(false)}
             aria-label="Close sidebar"
           >
