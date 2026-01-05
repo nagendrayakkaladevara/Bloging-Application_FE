@@ -43,16 +43,20 @@ export function NavWorkspaces({
   }[]
   className?: string
 }) {
-  const { setOpen } = useSidebar();
+  const { setOpen, setOpenMobile, isMobile } = useSidebar();
 
   const handleLinkClick = () => {
-    // Close sidebar when clicking on internal links
-    setOpen(false);
+    // Close sidebar when clicking on internal links (both desktop and mobile)
+    if (isMobile) {
+      setOpenMobile(false);
+    } else {
+      setOpen(false);
+    }
   };
 
   return (
     <SidebarGroup className={className}>
-      <SidebarGroupLabel>Workspaces</SidebarGroupLabel>
+      <SidebarGroupLabel>Collections</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {workspaces.map((workspace) => (

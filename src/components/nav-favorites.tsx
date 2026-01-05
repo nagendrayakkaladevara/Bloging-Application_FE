@@ -43,13 +43,17 @@ export function NavFavorites({
     emoji: string
   }[]
 }) {
-  const { isMobile, setOpen } = useSidebar()
+  const { isMobile, setOpen, setOpenMobile } = useSidebar()
   const { removeFavorite } = useFavorites()
   const [feedback, setFeedback] = useState<{ [key: string]: "copied" | "removed" | null }>({});
 
   const handleLinkClick = () => {
-    // Close sidebar when clicking on internal links
-    setOpen(false);
+    // Close sidebar when clicking on internal links (both desktop and mobile)
+    if (isMobile) {
+      setOpenMobile(false);
+    } else {
+      setOpen(false);
+    }
   };
 
   // Extract blog ID from URL (format: /blog/{id})
@@ -61,6 +65,7 @@ export function NavFavorites({
   const handleRemoveFavorite = (e: React.MouseEvent, url: string) => {
     e.preventDefault();
     e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
     const blogId = getBlogIdFromUrl(url);
     if (blogId) {
       removeFavorite(blogId);
@@ -75,6 +80,7 @@ export function NavFavorites({
   const handleCopyLink = async (e: React.MouseEvent, url: string) => {
     e.preventDefault();
     e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
     const fullUrl = `${window.location.origin}${url}`;
     try {
       await navigator.clipboard.writeText(fullUrl);
@@ -91,6 +97,7 @@ export function NavFavorites({
   const handleOpenInNewTab = (e: React.MouseEvent, url: string) => {
     e.preventDefault();
     e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
@@ -125,52 +132,50 @@ export function NavFavorites({
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-56"
+                className="w-48"
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
+                alignOffset={-4}
               >
                 <DropdownMenuItem 
-                  className="gap-3 px-3 py-2.5 rounded-md transition-colors cursor-pointer hover:bg-accent/50 focus:bg-accent/50"
                   onClick={(e) => handleRemoveFavorite(e, item.url)}
                   onSelect={(e) => e.preventDefault()}
                 >
                   {feedback[item.url] === "removed" ? (
                     <>
-                      <Check className="h-4 w-4 text-green-600 dark:text-green-500" />
-                      <span className="text-sm font-medium text-green-600 dark:text-green-500">Removed</span>
+                      <Check className="h-4 w-4 text-foreground" />
+                      <span className="text-sm text-foreground">Removed</span>
                     </>
                   ) : (
                     <>
-                      <StarOff className="h-4 w-4 text-amber-600 dark:text-amber-500" />
-                      <span className="text-sm font-medium">Remove from Favorites</span>
+                      <StarOff className="h-4 w-4" />
+                      <span className="text-sm">Remove from Favorites</span>
                     </>
                   )}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="my-1.5" />
+                <DropdownMenuSeparator />
                 <DropdownMenuItem 
-                  className="gap-3 px-3 py-2.5 rounded-md transition-colors cursor-pointer hover:bg-accent/50 focus:bg-accent/50"
                   onClick={(e) => handleCopyLink(e, item.url)}
                   onSelect={(e) => e.preventDefault()}
                 >
                   {feedback[item.url] === "copied" ? (
                     <>
-                      <Check className="h-4 w-4 text-green-600 dark:text-green-500" />
-                      <span className="text-sm font-medium text-green-600 dark:text-green-500">Copied</span>
+                      <Check className="h-4 w-4 text-foreground" />
+                      <span className="text-sm text-foreground">Copied</span>
                     </>
                   ) : (
                     <>
-                      <LinkIcon className="h-4 w-4 text-blue-600 dark:text-blue-500" />
-                      <span className="text-sm font-medium">Copy Link</span>
+                      <LinkIcon className="h-4 w-4" />
+                      <span className="text-sm">Copy Link</span>
                     </>
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  className="gap-3 px-3 py-2.5 rounded-md transition-colors cursor-pointer hover:bg-accent/50 focus:bg-accent/50"
                   onClick={(e) => handleOpenInNewTab(e, item.url)}
                   onSelect={(e) => e.preventDefault()}
                 >
-                  <ArrowUpRight className="h-4 w-4 text-foreground/70" />
-                  <span className="text-sm font-medium">Open in New Tab</span>
+                  <ArrowUpRight className="h-4 w-4" />
+                  <span className="text-sm">Open in New Tab</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * @author: @kokonutui
  * @description: A modern search bar component with action buttons and suggestions

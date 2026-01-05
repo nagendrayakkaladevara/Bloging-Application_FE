@@ -119,8 +119,9 @@ export function AppSidebar({ blogs, ...props }: AppSidebarProps) {
     },
     {
       title: "Help",
-      url: "#",
+      url: "/help",
       icon: MessageCircleQuestion,
+      isActive: location.pathname === "/help",
     },
   ];
 
