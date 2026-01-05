@@ -225,12 +225,28 @@ const Sidebar = React.forwardRef<
     const isCollapsedOffcanvas = state === "collapsed" && collapsible === "offcanvas";
     const isOpen = open;
 
-    // Close sidebar when clicking outside
+    // Close sidebar when clicking outside (but not on dropdown menus)
     React.useEffect(() => {
       if (!isOpen || isMobile) return;
 
       const handleClickOutside = (event: MouseEvent) => {
-        if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        const target = event.target as Node;
+        
+        // Don't close if clicking on dropdown menu (Radix Portal)
+        const dropdownMenu = document.querySelector('[role="menu"][data-radix-dropdown-menu-content]');
+        if (dropdownMenu && (dropdownMenu.contains(target) || dropdownMenu === target)) {
+          return;
+        }
+        
+        // Don't close if clicking on dropdown trigger or any element within a dropdown
+        const clickedElement = target as HTMLElement;
+        if (clickedElement.closest('[data-radix-dropdown-menu-trigger]') || 
+            clickedElement.closest('[data-radix-dropdown-menu-content]') ||
+            clickedElement.closest('[role="menu"]')) {
+          return;
+        }
+        
+        if (sidebarRef.current && !sidebarRef.current.contains(target)) {
           setOpen(false);
         }
       };
@@ -255,7 +271,15 @@ const Sidebar = React.forwardRef<
               "fixed inset-0 z-9 bg-black/50 transition-opacity duration-300 ease-in-out",
               isCollapsedOffcanvas ? "opacity-0 pointer-events-none" : "opacity-100"
             )}
-            onClick={() => setOpen(false)}
+            onClick={(e) => {
+              // Don't close if clicking on dropdown menu
+              const target = e.target as HTMLElement;
+              if (target.closest('[data-radix-dropdown-menu-content]') || 
+                  target.closest('[role="menu"]')) {
+                return;
+              }
+              setOpen(false);
+            }}
             aria-hidden="true"
           />
         )}
@@ -284,7 +308,7 @@ const Sidebar = React.forwardRef<
         <div
           ref={sidebarRef}
           className={cn(
-            "fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-all duration-300 ease-in-out md:flex",
+            "fixed inset-y-0 z-10 hidden h-svh transition-all duration-300 ease-in-out md:flex",
             side === "left"
               ? isCollapsedOffcanvas 
                 ? "left-[calc(var(--sidebar-width)*-1)]" 
@@ -301,13 +325,16 @@ const Sidebar = React.forwardRef<
           )}
           style={{
             "--sidebar-width": SIDEBAR_WIDTH,
+            width: SIDEBAR_WIDTH,
+            minWidth: SIDEBAR_WIDTH,
+            maxWidth: SIDEBAR_WIDTH,
           } as React.CSSProperties}
           {...props}
         >
           <div
             data-sidebar="sidebar"
             className="flex h-full w-full flex-col bg-sidebar transition-opacity duration-300 ease-in-out group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow overflow-hidden"
-            style={{ width: 'var(--sidebar-width)', maxWidth: 'var(--sidebar-width)', minWidth: 'var(--sidebar-width)' }}
+            style={{ width: '100%', maxWidth: '100%', minWidth: '100%' }}
           >
             {children}
           </div>

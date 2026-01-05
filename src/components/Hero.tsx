@@ -61,12 +61,13 @@ export function Hero() {
           </Badge>
         </motion.div>
         <motion.h1 
-          className="mt-6 text-3xl sm:text-3xl md:text-4xl lg:text-5xl md:leading-[1.2] font-semibold tracking-tighter"
+          className="mt-6 text-2xl sm:text-2xl md:text-3xl lg:text-4xl md:leading-[1.2] font-semibold tracking-tighter"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          Welcome to my blog <br />{`<Sai Nagendra Yakkadevara />`}
+          Welcome to my blogging platform 
+          <br />{`<Sai Nagendra Yakkadevara />`}
         </motion.h1>
         <motion.p 
           className="mt-6 md:text-lg text-foreground/80"
@@ -74,13 +75,15 @@ export function Hero() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          This is my blogging platform where I share<PointerHighlight
+          This is my blogging platform where I share
+          <PointerHighlight
             rectangleClassName="bg-blue-100 dark:bg-blue-900 border-blue-300 dark:border-blue-700 leading-loose"
             pointerClassName="text-blue-500 h-3 w-3"
             containerClassName="inline-block mx-1"
           >
             <span className="relative z-10 px-1.5"> tools and resources </span>
-          </PointerHighlight>that I find useful.
+          </PointerHighlight>
+          that I find useful.
         </motion.p>
         <motion.div 
           className="mt-12 flex items-center justify-center gap-4 flex-wrap"

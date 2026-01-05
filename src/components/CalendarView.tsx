@@ -146,19 +146,20 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Calendar Header */}
-      <div className="flex items-center justify-center flex-wrap gap-4">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="icon"
             onClick={goToPrevious}
             aria-label="Previous"
+            className="h-8 w-8 sm:h-10 sm:w-10"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
-          <h2 className="text-2xl font-semibold min-w-[200px] text-center">
+          <h2 className="text-lg sm:text-2xl font-semibold min-w-[150px] sm:min-w-[200px] text-center">
             {format(currentDate, "MMMM yyyy", { locale: enUS })}
           </h2>
           <Button
@@ -166,74 +167,66 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
             size="icon"
             onClick={goToNext}
             aria-label="Next"
+            className="h-8 w-8 sm:h-10 sm:w-10"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 border rounded-md">
+          <div className="flex items-center gap-0.5 sm:gap-1 border rounded-md">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setView("month")}
-              className="rounded-r-none transition-all duration-200 ease-out"
-              style={view === "month" ? {
-                backgroundColor: "hsl(var(--foreground))",
-                color: "hsl(var(--background))",
-                fontWeight: 600
-              } : {
-                backgroundColor: "transparent",
-                color: "hsl(var(--foreground))",
-                fontWeight: 400
-              }}
+              className={cn(
+                "rounded-r-none transition-all duration-200 ease-out text-xs sm:text-sm px-2 sm:px-3 h-7 sm:h-9",
+                view === "month" 
+                  ? "bg-foreground text-background font-semibold" 
+                  : "bg-transparent text-foreground font-normal"
+              )}
             >
-              Month
+              <span className="hidden sm:inline">Month</span>
+              <span className="sm:hidden">M</span>
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setView("week")}
-              className="rounded-none transition-all duration-200 ease-out"
-              style={view === "week" ? {
-                backgroundColor: "hsl(var(--foreground))",
-                color: "hsl(var(--background))",
-                fontWeight: 600
-              } : {
-                backgroundColor: "transparent",
-                color: "hsl(var(--foreground))",
-                fontWeight: 400
-              }}
+              className={cn(
+                "rounded-none transition-all duration-200 ease-out text-xs sm:text-sm px-2 sm:px-3 h-7 sm:h-9",
+                view === "week" 
+                  ? "bg-foreground text-background font-semibold" 
+                  : "bg-transparent text-foreground font-normal"
+              )}
             >
-              Week
+              <span className="hidden sm:inline">Week</span>
+              <span className="sm:hidden">W</span>
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setView("day")}
-              className="rounded-l-none transition-all duration-200 ease-out"
-              style={view === "day" ? {
-                backgroundColor: "hsl(var(--foreground))",
-                color: "hsl(var(--background))",
-                fontWeight: 600
-              } : {
-                backgroundColor: "transparent",
-                color: "hsl(var(--foreground))",
-                fontWeight: 400
-              }}
+              className={cn(
+                "rounded-l-none transition-all duration-200 ease-out text-xs sm:text-sm px-2 sm:px-3 h-7 sm:h-9",
+                view === "day" 
+                  ? "bg-foreground text-background font-semibold" 
+                  : "bg-transparent text-foreground font-normal"
+              )}
             >
-              Day
+              <span className="hidden sm:inline">Day</span>
+              <span className="sm:hidden">D</span>
             </Button>
           </div>
-          <Button variant="outline" onClick={goToToday}>
+          <Button variant="outline" onClick={goToToday} size="sm" className="text-xs sm:text-sm h-7 sm:h-9 px-2 sm:px-4">
             Today
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Calendar */}
-        <div className="lg:col-span-2">
-          <div style={{ height: "600px" }} className="relative overflow-hidden">
+        <div className="lg:col-span-2 order-1">
+          <div className="h-[400px] sm:h-[500px] md:h-[600px] relative overflow-hidden rounded-lg border bg-card">
             <AnimatePresence mode="wait">
               <motion.div
                 key={view}
@@ -276,15 +269,15 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
         </div>
 
         {/* Events Panel */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 order-2">
           <Card>
             <CardHeader>
-              <CardTitle>
+              <CardTitle className="text-base sm:text-lg">
                 {selectedDate
                   ? format(selectedDate, "EEEE, MMMM d, yyyy", { locale: enUS })
                   : "Select a date"}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 {selectedDateEvents.length > 0
                   ? `${selectedDateEvents.length} blog${selectedDateEvents.length > 1 ? "s" : ""}`
                   : "No blog scheduled"}
@@ -292,26 +285,26 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
             </CardHeader>
             <CardContent>
               {selectedDateEvents.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {selectedDateEvents.map((event) => (
                     <div
                       key={event.id}
                       className={cn(
-                        "p-3 rounded-lg border",
-                        event.color === "blue" && "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950",
-                        event.color === "green" && "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950",
-                        event.color === "purple" && "border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-950",
-                        event.color === "orange" && "border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950",
+                        "p-2 sm:p-3 rounded-lg border",
+                        event.color === "blue" && "border-blue-200/50 bg-blue-50/50 [.dark_&]:border-blue-800/50 [.dark_&]:bg-blue-950/50",
+                        event.color === "green" && "border-green-200/50 bg-green-50/50 [.dark_&]:border-green-800/50 [.dark_&]:bg-green-950/50",
+                        event.color === "purple" && "border-purple-200/50 bg-purple-50/50 [.dark_&]:border-purple-800/50 [.dark_&]:bg-purple-950/50",
+                        event.color === "orange" && "border-orange-200/50 bg-orange-50/50 [.dark_&]:border-orange-800/50 [.dark_&]:bg-orange-950/50",
                         !event.color && "border-border bg-muted"
                       )}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-sm mb-1">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-xs sm:text-sm mb-1 truncate">
                             {event.title}
                           </h4>
                           {event.description && (
-                            <p className="text-xs text-muted-foreground mb-2">
+                            <p className="text-xs text-muted-foreground mb-1 sm:mb-2 line-clamp-2">
                               {event.description}
                             </p>
                           )}
@@ -325,8 +318,8 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
                           )}
                         </div>
                         {event.blogId && (
-                          <Link to={`/blog/${event.blogId}`}>
-                            <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                          <Link to={`/blog/${event.blogId}`} className="shrink-0">
+                            <Button variant="ghost" size="sm" className="h-6 sm:h-7 px-2 text-xs">
                               View
                             </Button>
                           </Link>
@@ -346,10 +339,10 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
           {/* Upcoming Events */}
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle className="text-lg">Upcoming Events</CardTitle>
+              <CardTitle className="text-base sm:text-lg">Upcoming Events</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2">
                 {mockCalendarEvents
                   .filter((event) => {
                     const eventDate = new Date(event.date);
@@ -362,11 +355,11 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
                   .map((event) => (
                     <div
                       key={event.id}
-                      className="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
+                      className="flex items-center gap-2 p-1.5 sm:p-2 rounded-md hover:bg-muted transition-colors"
                     >
                       <div
                         className={cn(
-                          "w-2 h-2 rounded-full",
+                          "w-2 h-2 rounded-full shrink-0",
                           event.color === "blue" && "bg-blue-500",
                           event.color === "green" && "bg-green-500",
                           event.color === "purple" && "bg-purple-500",
@@ -375,10 +368,10 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
                         )}
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
+                        <p className="text-xs sm:text-sm font-medium truncate">
                           {event.title}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground truncate">
                           {format(event.date, "MMM d, yyyy", { locale: enUS })}
                           {event.startTime && ` • ${event.startTime}`}
                         </p>
@@ -391,7 +384,7 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
                   today.setHours(0, 0, 0, 0);
                   return eventDate >= today;
                 }).length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-4">
+                  <p className="text-xs sm:text-sm text-muted-foreground text-center py-4">
                     No upcoming blogs
                   </p>
                 )}

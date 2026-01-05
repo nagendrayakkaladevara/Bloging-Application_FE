@@ -119,8 +119,9 @@ export function AppSidebar({ blogs, ...props }: AppSidebarProps) {
     },
     {
       title: "Help",
-      url: "#",
+      url: "/help",
       icon: MessageCircleQuestion,
+      isActive: location.pathname === "/help",
     },
   ];
 
@@ -139,7 +140,7 @@ export function AppSidebar({ blogs, ...props }: AppSidebarProps) {
         <NavMain items={navMain} />
       </SidebarHeader>
       <SidebarContent>
-        {favorites.length > 0 && <NavFavorites favorites={favorites} />}
+        <NavFavorites favorites={favorites} />
         {workspaces.length > 0 && <NavWorkspaces workspaces={workspaces} className="-mt-2" />}
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>

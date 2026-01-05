@@ -9,14 +9,24 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Hero } from "@/components/Hero";
 import { EmptyBlogState } from "@/components/EmptyBlogState";
 import type { BlogPreview } from "@/types/blog";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Search } from "lucide-react";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { useSearch } from "@/contexts/SearchContext";
+import { useEffect, useState } from "react";
 
 interface HomePageProps {
   blogs: BlogPreview[];
 }
 
 export function HomePage({ blogs }: HomePageProps) {
+  const { openSearch } = useSearch();
+  const [isMac, setIsMac] = useState(false);
+
+  useEffect(() => {
+    setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
+  }, []);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -27,25 +37,34 @@ export function HomePage({ blogs }: HomePageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Search Shortcut Button - Top Right Corner */}
+      <motion.div
+        className="fixed top-4 right-4 z-50 flex flex-col items-center gap-2"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={openSearch}
+          className="h-10 w-10 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105 bg-background/80 backdrop-blur-sm border-border"
+          aria-label="Open search"
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+        <kbd className="px-1.5 py-0.5 text-[10px] rounded border bg-background/80 backdrop-blur-sm text-muted-foreground font-mono">
+          {isMac ? "⌘" : "Ctrl"}K
+        </kbd>
+      </motion.div>
         {/* Hero Section */}
         <Hero />
         
         {/* Blog Catalogue Section */}
-        <div id="blogs" className="min-h-screen w-full bg-white relative">
-          {/* Magenta Orb Grid Background */}
-          <div
-            className="absolute inset-0 z-0"
-            style={{
-              background: "white",
-              backgroundImage: `
-                linear-gradient(to right, rgba(71,85,105,0.15) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(71,85,105,0.15) 1px, transparent 1px),
-                radial-gradient(circle at 50% 60%, rgba(236,72,153,0.15) 0%, rgba(168,85,247,0.05) 40%, transparent 70%)
-              `,
-              backgroundSize: "40px 40px, 40px 40px, 100% 100%",
-            }}
-          />
+        <div id="blogs" className="min-h-screen w-full bg-background relative">
+          {/* Grid Background Pattern */}
+          <div className="absolute inset-0 z-0 bg-blog-grid" />
           {/* Blog Content */}
           <div className="container mx-auto px-4 py-12 max-w-7xl relative z-10">
             {blogs.length === 0 ? (
@@ -61,7 +80,7 @@ export function HomePage({ blogs }: HomePageProps) {
                     transition={{ 
                       duration: 0.5, 
                       delay: index * 0.1,
-                      ease: [0.25, 0.46, 0.45, 0.94]
+                      ease: "easeOut"
                     }}
                   >
                     <Link to={`/blog/${blog.id}`}>
@@ -69,7 +88,7 @@ export function HomePage({ blogs }: HomePageProps) {
                         whileHover={{ scale: 1.02 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <Card className="bg-white hover:shadow-lg transition-shadow cursor-pointer overflow-hidden mb-3">
+                        <Card className="bg-card hover:shadow-lg transition-shadow cursor-pointer overflow-hidden mb-3">
                           <div className="flex flex-row">
                             {/* Left side - Content */}
                             <div className="flex-1 p-4 sm:p-6">

@@ -1,6 +1,7 @@
 import React from "react"
-import { type LucideIcon } from "lucide-react"
+import { type LucideIcon, Moon, Sun } from "lucide-react"
 import { Link } from "react-router-dom"
+import { useTheme } from "@/contexts/ThemeContext"
 
 import {
   SidebarGroup,
@@ -24,11 +25,20 @@ export function NavSecondary({
     isActive?: boolean
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
-  const { setOpen } = useSidebar();
+  const { setOpen, setOpenMobile, isMobile } = useSidebar();
+  const { resolvedColorMode, setColorMode } = useTheme();
 
   const handleLinkClick = () => {
-    // Close sidebar when clicking on internal links
-    setOpen(false);
+    // Close sidebar when clicking on internal links (both desktop and mobile)
+    if (isMobile) {
+      setOpenMobile(false);
+    } else {
+      setOpen(false);
+    }
+  };
+
+  const handleThemeToggle = () => {
+    setColorMode(resolvedColorMode === "dark" ? "light" : "dark");
   };
 
   return (
@@ -53,6 +63,13 @@ export function NavSecondary({
               {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
             </SidebarMenuItem>
           ))}
+          {/* Theme Toggle */}
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleThemeToggle}>
+              {resolvedColorMode === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              <span>{resolvedColorMode === "dark" ? "Light Mode" : "Dark Mode"}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
