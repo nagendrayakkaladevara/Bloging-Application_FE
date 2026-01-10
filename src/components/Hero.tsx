@@ -56,7 +56,7 @@ export function Hero() {
             asChild
           >
             <Link to="/" className="flex items-center">
-              Just released v1.0.0 <ArrowUpRight className="ml-1 h-4 w-4" />
+              Just released v1.2.0 <ArrowUpRight className="ml-1 h-4 w-4" />
             </Link>
           </Badge>
         </motion.div>
