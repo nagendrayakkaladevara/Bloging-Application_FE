@@ -129,26 +129,26 @@ export function BlogPage({ blog, onVote }: BlogPageProps) {
 
         {/* Header */}
         <header className="mb-8">
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <h1 className="text-4xl md:text-5xl font-bold flex-1">{blog.meta.title}</h1>
-            {blogId && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleFavoriteToggle}
-                aria-label={isFavorite(blogId) ? "Remove from favorites" : "Add to favorites"}
-                className="shrink-0"
-              >
-                <Star
-                  className={`h-5 w-5 ${
-                    isFavorite(blogId)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-muted-foreground"
-                  }`}
-                />
-              </Button>
-            )}
+          <div className="mb-4">
+            <h1 className="text-2xl md:text-3xl font-bold">{blog.meta.title}</h1>
           </div>
+          {blogId && (
+            <Button
+              variant="outline"
+              onClick={handleFavoriteToggle}
+              aria-label={isFavorite(blogId) ? "Remove from favorites" : "Add to favorites"}
+              className="rounded-full mb-6"
+            >
+              <Star
+                className={`h-4 w-4 mr-2 ${
+                  isFavorite(blogId)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-muted-foreground"
+                }`}
+              />
+              {isFavorite(blogId) ? "Remove from favorites" : "Add to favorites"}
+            </Button>
+          )}
           <p className="text-xl text-muted-foreground mb-6">{blog.meta.description}</p>
 
           {/* Meta Information */}

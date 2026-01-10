@@ -41,7 +41,7 @@ function GlobalKeyboardShortcuts() {
 function App() {
   const [blogs] = useState(getBlogPreviews());
 
-  const handleVote = (_blogId: string, _vote: "upvote" | "downvote") => {
+  const handleVote = () => {
     // Vote handling logic can be implemented here
     // For now, this is a placeholder
   };

@@ -7,12 +7,12 @@ interface HeadingBlockProps {
 
 export function HeadingBlock({ block }: HeadingBlockProps) {
   const headingClasses = {
-    1: "text-4xl font-bold mt-8 mb-4",
-    2: "text-3xl font-bold mt-6 mb-3",
-    3: "text-2xl font-semibold mt-5 mb-2",
-    4: "text-xl font-semibold mt-4 mb-2",
-    5: "text-lg font-semibold mt-3 mb-2",
-    6: "text-base font-semibold mt-3 mb-2",
+    1: "text-2xl font-bold mt-8 mb-4",
+    2: "text-xl font-bold mt-6 mb-3",
+    3: "text-lg font-semibold mt-5 mb-2",
+    4: "text-lg font-semibold mt-4 mb-2",
+    5: "text-base font-semibold mt-3 mb-2",
+    6: "text-sm font-semibold mt-3 mb-2",
   };
 
   const className = cn(headingClasses[block.level], "scroll-mt-20");

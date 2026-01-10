@@ -1,7 +1,7 @@
 /**
  * @author: @kokonutui
  * @description: A modern search bar component with action buttons and suggestions
- * @version: 1.0.0
+ * @version: 1.2.0
  * @date: 2025-06-26
  * @license: MIT
  * @website: https://kokonutui.com
@@ -159,25 +159,26 @@ function ActionSearchBar({
 
     const handleKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (!result?.actions.length) return;
+            if (!result?.actions?.length) return;
 
+            const actions = result.actions;
             switch (e.key) {
                 case "ArrowDown":
                     e.preventDefault();
                     setActiveIndex((prev) =>
-                        prev < result.actions.length - 1 ? prev + 1 : 0
+                        prev < actions.length - 1 ? prev + 1 : 0
                     );
                     break;
                 case "ArrowUp":
                     e.preventDefault();
                     setActiveIndex((prev) =>
-                        prev > 0 ? prev - 1 : result.actions.length - 1
+                        prev > 0 ? prev - 1 : actions.length - 1
                     );
                     break;
                 case "Enter":
                     e.preventDefault();
-                    if (activeIndex >= 0 && result.actions[activeIndex]) {
-                        setSelectedAction(result.actions[activeIndex]);
+                    if (activeIndex >= 0 && actions[activeIndex]) {
+                        setSelectedAction(actions[activeIndex]);
                     }
                     break;
                 case "Escape":
