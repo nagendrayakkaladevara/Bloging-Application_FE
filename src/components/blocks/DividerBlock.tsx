@@ -5,7 +5,9 @@ interface DividerBlockProps {
   block: DividerBlockType;
 }
 
-export function DividerBlock({ block: _block }: DividerBlockProps) {
+export function DividerBlock({ block }: DividerBlockProps) {
+  // Block is kept for future use
+  void block;
   return <Separator className="my-8" />;
 }
 

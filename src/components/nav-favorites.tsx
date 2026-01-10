@@ -27,6 +27,40 @@ import {
 } from "@/components/ui/sidebar"
 
 /**
+ * Calculate max character length based on sidebar width
+ * Mobile: 18rem (288px), Desktop: 14rem (224px)
+ * Accounting for: padding (px-2 = 0.5rem each side), emoji (~1rem), gap (0.5rem), action button (~2rem)
+ * Average character width in text-sm: ~0.45rem
+ */
+function getMaxTextLength(isMobile: boolean): number {
+  // Sidebar widths in rem
+  const SIDEBAR_WIDTH_MOBILE = 18; // rem
+  const SIDEBAR_WIDTH_DESKTOP = 14; // rem
+  
+  const sidebarWidth = isMobile ? SIDEBAR_WIDTH_MOBILE : SIDEBAR_WIDTH_DESKTOP;
+  
+  // Space taken by non-text elements (in rem)
+  // px-2 = 0.5rem padding on each side = 1rem total
+  const buttonPadding = 0.5 * 2; 
+  const emoji = 1; // emoji width (~1rem)
+  const gap = 0.5; // gap-2 between emoji and text
+  const actionButton = 2; // space for the more menu button (pr-8 = 2rem)
+  
+  // Available space for text
+  const availableWidth = sidebarWidth - buttonPadding - emoji - gap - actionButton;
+  
+  // Average character width in text-sm
+  // Use smaller width for mobile to allow more characters (mobile has more space)
+  const avgCharWidth = isMobile ? 0.4 : 0.45;
+  
+  // Calculate max characters, subtract 2 for ellipsis (reduced for mobile)
+  const ellipsisBuffer = isMobile ? 2 : 3;
+  const maxChars = Math.floor(availableWidth / avgCharWidth) - ellipsisBuffer;
+  
+  return Math.max(maxChars, 10); // Minimum 10 characters
+}
+
+/**
  * Truncate text to a maximum length
  */
 function truncateText(text: string, maxLength: number = 15): string {
@@ -115,12 +149,12 @@ export function NavFavorites({
               {item.url.startsWith("/") ? (
                 <Link to={item.url} title={item.name} onClick={handleLinkClick}>
                   <span>{item.emoji}</span>
-                  <span className="truncate">{truncateText(item.name, 15)}</span>
+                  <span className="truncate">{truncateText(item.name, getMaxTextLength(isMobile))}</span>
                 </Link>
               ) : (
                 <a href={item.url} title={item.name}>
                   <span>{item.emoji}</span>
-                  <span className="truncate">{truncateText(item.name, 15)}</span>
+                  <span className="truncate">{truncateText(item.name, getMaxTextLength(isMobile))}</span>
                 </a>
               )}
             </SidebarMenuButton>

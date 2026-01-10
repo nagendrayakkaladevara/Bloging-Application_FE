@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# ESLint cache
+.eslintcache
+
+# Test coverage
+coverage
+*.lcov
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

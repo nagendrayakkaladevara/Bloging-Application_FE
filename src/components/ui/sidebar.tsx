@@ -176,6 +176,50 @@ const Sidebar = React.forwardRef<
     ref
   ) => {
     const { isMobile, state, open, openMobile, setOpenMobile, setOpen } = useSidebar()
+    const sidebarRef = React.useRef<HTMLDivElement>(null)
+    const isCollapsedOffcanvas = state === "collapsed" && collapsible === "offcanvas";
+    const isOpen = open;
+
+    // Close sidebar when clicking outside (but not on dropdown menus)
+    // Only needed for desktop offcanvas sidebar
+    React.useEffect(() => {
+      if (!isOpen || isMobile || collapsible !== "offcanvas") return;
+
+      const handleClickOutside = (event: MouseEvent) => {
+        const target = event.target as Node;
+        
+        // Don't close if clicking on any dropdown menu (Radix Portal)
+        // Check all dropdown menus, not just the first one
+        const dropdownMenus = document.querySelectorAll('[role="menu"][data-radix-dropdown-menu-content]');
+        for (const dropdownMenu of dropdownMenus) {
+          if (dropdownMenu.contains(target) || dropdownMenu === target) {
+            return;
+          }
+        }
+        
+        // Don't close if clicking on dropdown trigger or any element within a dropdown
+        const clickedElement = target as HTMLElement;
+        if (clickedElement.closest('[data-radix-dropdown-menu-trigger]') || 
+            clickedElement.closest('[data-radix-dropdown-menu-content]') ||
+            clickedElement.closest('[role="menu"]')) {
+          return;
+        }
+        
+        if (sidebarRef.current && !sidebarRef.current.contains(target)) {
+          setOpen(false);
+        }
+      };
+
+      // Add event listener with a small delay to avoid immediate closing
+      const timeoutId = setTimeout(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+      }, 100);
+
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [isOpen, isMobile, collapsible, setOpen]);
 
     if (collapsible === "none") {
       return (
@@ -194,7 +238,8 @@ const Sidebar = React.forwardRef<
 
     if (isMobile) {
       // Filter out props that conflict with motion.div
-      const { onDrag, onDragStart, onDragEnd, ...safeProps } = props as any;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { onDrag: _onDrag, onDragStart: _onDragStart, onDragEnd: _onDragEnd, ...safeProps } = props as Record<string, unknown>;
       
       const sidebarContent = (
         <AnimatePresence>
@@ -248,57 +293,13 @@ const Sidebar = React.forwardRef<
         : null;
     }
 
-    const sidebarRef = React.useRef<HTMLDivElement>(null)
-    const isCollapsedOffcanvas = state === "collapsed" && collapsible === "offcanvas";
-    const isOpen = open;
-
-    // Close sidebar when clicking outside (but not on dropdown menus)
-    React.useEffect(() => {
-      if (!isOpen || isMobile) return;
-
-      const handleClickOutside = (event: MouseEvent) => {
-        const target = event.target as Node;
-        
-        // Don't close if clicking on any dropdown menu (Radix Portal)
-        // Check all dropdown menus, not just the first one
-        const dropdownMenus = document.querySelectorAll('[role="menu"][data-radix-dropdown-menu-content]');
-        for (const dropdownMenu of dropdownMenus) {
-          if (dropdownMenu.contains(target) || dropdownMenu === target) {
-            return;
-          }
-        }
-        
-        // Don't close if clicking on dropdown trigger or any element within a dropdown
-        const clickedElement = target as HTMLElement;
-        if (clickedElement.closest('[data-radix-dropdown-menu-trigger]') || 
-            clickedElement.closest('[data-radix-dropdown-menu-content]') ||
-            clickedElement.closest('[role="menu"]')) {
-          return;
-        }
-        
-        if (sidebarRef.current && !sidebarRef.current.contains(target)) {
-          setOpen(false);
-        }
-      };
-
-      // Add event listener with a small delay to avoid immediate closing
-      const timeoutId = setTimeout(() => {
-        document.addEventListener("mousedown", handleClickOutside);
-      }, 100);
-
-      return () => {
-        clearTimeout(timeoutId);
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [isOpen, isMobile, setOpen]);
-
     return (
       <>
         {/* Backdrop overlay */}
         {isOpen && !isMobile && collapsible === "offcanvas" && (
           <div
             className={cn(
-              "fixed inset-0 z-9 bg-black/50 transition-opacity duration-300 ease-in-out",
+              "fixed inset-0 z-[55] bg-black/50 transition-opacity duration-300 ease-in-out",
               isCollapsedOffcanvas ? "opacity-0 pointer-events-none" : "opacity-100"
             )}
             onClick={(e) => {
@@ -346,7 +347,7 @@ const Sidebar = React.forwardRef<
         <div
           ref={sidebarRef}
           className={cn(
-            "fixed inset-y-0 z-10 hidden h-svh transition-all duration-300 ease-in-out md:flex",
+            "fixed inset-y-0 z-[60] hidden h-svh transition-all duration-300 ease-in-out md:flex",
             side === "left"
               ? isCollapsedOffcanvas 
                 ? "left-[calc(var(--sidebar-width)*-1)]" 
@@ -776,9 +777,8 @@ const SidebarMenuSkeleton = React.forwardRef<
   }
 >(({ className, showIcon = false, ...props }, ref) => {
   // Random width between 50 to 90%.
-  const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
-  }, [])
+  // Use state with lazy initialization to avoid calling Math.random during render
+  const [width] = React.useState(() => `${Math.floor(Math.random() * 40) + 50}%`);
 
   return (
     <div

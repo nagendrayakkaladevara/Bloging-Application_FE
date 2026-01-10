@@ -68,7 +68,7 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
     }
   };
 
-  const handleSelectEvent = (event: any) => {
+  const handleSelectEvent = (event: { start: Date; [key: string]: unknown }) => {
     setSelectedDate(event.start);
     if (onDateSelect) {
       onDateSelect(event.start);
@@ -120,7 +120,7 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
   }, [selectedDate]);
 
   // Custom event style
-  const eventStyleGetter = (event: any) => {
+  const eventStyleGetter = (event: { resource?: CalendarEvent; [key: string]: unknown }) => {
     const originalEvent = event.resource as CalendarEvent;
     const color = originalEvent?.color || "blue";
     

@@ -67,19 +67,6 @@ export function AppSidebar({ blogs, ...props }: AppSidebarProps) {
         url: `/blog/${blog.id}`,
       })),
     },
-    ...(blogs.length > 0
-      ? [
-          {
-            name: "Recent Posts",
-            emoji: "🕒",
-            pages: blogs.slice(0, 5).map((blog) => ({
-              name: blog.meta.title,
-              emoji: "📄",
-              url: `/blog/${blog.id}`,
-            })),
-          },
-        ]
-      : []),
   ];
 
   const navMain = [

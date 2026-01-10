@@ -186,7 +186,7 @@ function ActionSearchBar({
                     break;
             }
         },
-        [result?.actions, activeIndex]
+        [result, activeIndex]
     );
 
     const handleActionClick = useCallback((action: Action) => {
