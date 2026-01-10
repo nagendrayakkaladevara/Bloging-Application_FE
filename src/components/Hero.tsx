@@ -61,7 +61,7 @@ export function Hero() {
           </Badge>
         </motion.div>
         <motion.h1 
-          className="mt-6 text-2xl sm:text-2xl md:text-3xl lg:text-4xl md:leading-[1.2] font-semibold tracking-tighter"
+          className="mt-6 text-xl sm:text-2xl md:text-2xl lg:text-3xl md:leading-[1.2] font-semibold tracking-tighter"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
