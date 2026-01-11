@@ -94,15 +94,15 @@ export function AppSidebar({ blogs, ...props }: AppSidebarProps) {
       icon: BookOpen,
       isActive: location.pathname.startsWith("/blog"),
     },
-  ];
-
-  const navSecondary = [
     {
       title: "Calendar",
       url: "/calendar",
       icon: Calendar,
       isActive: location.pathname === "/calendar",
     },
+  ];
+
+  const navSecondary = [
     {
       title: "Settings",
       url: "/settings",

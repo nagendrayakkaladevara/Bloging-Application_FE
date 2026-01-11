@@ -1,7 +1,8 @@
 import React from "react"
-import { type LucideIcon, Moon, Sun } from "lucide-react"
+import { type LucideIcon, Moon, Sun, Monitor } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useTheme } from "@/contexts/ThemeContext"
+import { cn } from "@/lib/utils"
 
 import {
   SidebarGroup,
@@ -26,7 +27,7 @@ export function NavSecondary({
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   const { setOpen, setOpenMobile, isMobile } = useSidebar();
-  const { resolvedColorMode, setColorMode } = useTheme();
+  const { colorMode, setColorMode } = useTheme();
 
   const handleLinkClick = () => {
     // Close sidebar when clicking on internal links (both desktop and mobile)
@@ -37,15 +38,23 @@ export function NavSecondary({
     }
   };
 
-  const handleThemeToggle = () => {
-    setColorMode(resolvedColorMode === "dark" ? "light" : "dark");
-  };
+  // Separate Settings and Help from other items
+  const settingsItem = items.find(item => item.title === "Settings");
+  const helpItem = items.find(item => item.title === "Help");
+  const otherItems = items.filter(item => item.title !== "Settings" && item.title !== "Help");
+
+  const themeModes: Array<{ mode: "system" | "light" | "dark"; icon: typeof Monitor; label: string }> = [
+    { mode: "system", icon: Monitor, label: "System" },
+    { mode: "light", icon: Sun, label: "Light" },
+    { mode: "dark", icon: Moon, label: "Dark" },
+  ];
 
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
+          {/* Other items (like Calendar) */}
+          {otherItems.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild isActive={item.isActive}>
                 {item.url.startsWith("/") ? (
@@ -63,12 +72,93 @@ export function NavSecondary({
               {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
             </SidebarMenuItem>
           ))}
-          {/* Theme Toggle */}
+          
+          {/* Settings | Help | Theme buttons in a horizontal row */}
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleThemeToggle}>
-              {resolvedColorMode === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              <span>{resolvedColorMode === "dark" ? "Light Mode" : "Dark Mode"}</span>
-            </SidebarMenuButton>
+            <div className="flex items-stretch gap-0.5 rounded-md overflow-hidden bg-sidebar-accent/30 p-0.5">
+              {/* Settings */}
+              {settingsItem && (
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={settingsItem.isActive} 
+                  className={cn(
+                    "rounded-md",
+                    isMobile ? "flex-1 min-w-0" : "h-8 w-8 p-0"
+                  )}
+                  tooltip={!isMobile ? settingsItem.title : undefined}
+                >
+                  {settingsItem.url.startsWith("/") ? (
+                    <Link to={settingsItem.url} onClick={handleLinkClick} className="flex items-center justify-center gap-1.5">
+                      <settingsItem.icon className="h-4 w-4 shrink-0" />
+                      {isMobile && <span className="truncate text-xs">{settingsItem.title}</span>}
+                    </Link>
+                  ) : (
+                    <a 
+                      href={settingsItem.url} 
+                      onClick={(e) => { if (settingsItem.url === "#") e.preventDefault(); }}
+                      className="flex items-center justify-center gap-1.5"
+                    >
+                      <settingsItem.icon className="h-4 w-4 shrink-0" />
+                      {isMobile && <span className="truncate text-xs">{settingsItem.title}</span>}
+                    </a>
+                  )}
+                </SidebarMenuButton>
+              )}
+              
+              {/* Help */}
+              {helpItem && (
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={helpItem.isActive} 
+                  className={cn(
+                    "rounded-md",
+                    isMobile ? "flex-1 min-w-0" : "h-8 w-8 p-0"
+                  )}
+                  tooltip={!isMobile ? helpItem.title : undefined}
+                >
+                  {helpItem.url.startsWith("/") ? (
+                    <Link to={helpItem.url} onClick={handleLinkClick} className="flex items-center justify-center gap-1.5">
+                      <helpItem.icon className="h-4 w-4 shrink-0" />
+                      {isMobile && <span className="truncate text-xs">{helpItem.title}</span>}
+                    </Link>
+                  ) : (
+                    <a 
+                      href={helpItem.url} 
+                      onClick={(e) => { if (helpItem.url === "#") e.preventDefault(); }}
+                      className="flex items-center justify-center gap-1.5"
+                    >
+                      <helpItem.icon className="h-4 w-4 shrink-0" />
+                      {isMobile && <span className="truncate text-xs">{helpItem.title}</span>}
+                    </a>
+                  )}
+                </SidebarMenuButton>
+              )}
+              
+              {/* Theme buttons */}
+              <div className="flex items-center gap-0.5">
+                {themeModes.map((theme) => {
+                  const Icon = theme.icon;
+                  const isActive = colorMode === theme.mode;
+                  return (
+                    <button
+                      key={theme.mode}
+                      onClick={() => setColorMode(theme.mode)}
+                      className={cn(
+                        "flex items-center justify-center h-8 w-8 rounded-md transition-all",
+                        "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                          : "text-sidebar-foreground/70"
+                      )}
+                      title={theme.label}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
