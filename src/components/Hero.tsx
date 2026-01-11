@@ -10,6 +10,7 @@ import { ArrowUpRight, CirclePlay } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { PointerHighlight } from "./ui/pointer-highlight";
+import { APP_VERSION } from "@/lib/version";
 
 export function Hero() {
   const handleScrollToBlogs = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -56,7 +57,7 @@ export function Hero() {
             asChild
           >
             <Link to="/" className="flex items-center">
-              Just released v1.2.0 <ArrowUpRight className="ml-1 h-4 w-4" />
+              Just released v{APP_VERSION} <ArrowUpRight className="ml-1 h-4 w-4" />
             </Link>
           </Badge>
         </motion.div>

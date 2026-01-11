@@ -1,7 +1,7 @@
 /**
  * @author: @kokonutui
  * @description: A modern search bar component with action buttons and suggestions
- * @version: 1.2.0
+ * @version: 1.3.0
  * @date: 2025-06-26
  * @license: MIT
  * @website: https://kokonutui.com
