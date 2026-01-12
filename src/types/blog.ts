@@ -37,6 +37,7 @@ export interface BlogLayout {
 export interface BlogSettings {
   enableVoting: boolean;
   enableSocialShare: boolean;
+  enableComments: boolean;
 }
 
 // ============================================================================

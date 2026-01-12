@@ -1,9 +1,11 @@
+You are a staff software developer with 15 years of experience in backend development. You build application with production level architecture.here is the requirement documentation: 
+
 # Backend Requirements Document
 ## Blog Platform API
 
 **Version:** 1.0  
 **Date:** 2024  
-**Technology Stack:** Express.js, TypeScript, PostgreSQL  
+**Technology Stack:** Express.js, TypeScript, PostgreSQL neon database  
 **Frontend:** React + TypeScript
 
 ---
@@ -12,12 +14,11 @@
 
 1. [Overview](#overview)
 2. [Database Schema](#database-schema)
-3. [Authentication & Authorization](#authentication--authorization)
-4. [API Endpoints](#api-endpoints)
-5. [Data Models](#data-models)
-6. [Error Handling](#error-handling)
-7. [Validation Rules](#validation-rules)
-8. [Additional Requirements](#additional-requirements)
+3. [API Endpoints](#api-endpoints)
+4. [Data Models](#data-models)
+5. [Error Handling](#error-handling)
+6. [Validation Rules](#validation-rules)
+7. [Additional Requirements](#additional-requirements)
 
 ---
 
@@ -25,13 +26,13 @@
 
 This document outlines the backend API requirements for a configuration-driven blog platform. The backend should provide RESTful APIs to support:
 
-- Blog content management (CRUD operations)
-- User voting system
-- Favorites management
+- Blog content management (read-only for public)
+- Voting system (anonymous, IP-based)
 - Search functionality
 - Calendar events management
-- User preferences and settings
 - AI chat integration (future)
+
+**Note:** This platform is open to all users. No authentication or user accounts are required.
 
 ### Base URL
 ```
@@ -67,8 +68,6 @@ All API responses should follow this structure:
 - `200` - Success
 - `201` - Created
 - `400` - Bad Request
-- `401` - Unauthorized
-- `403` - Forbidden
 - `404` - Not Found
 - `409` - Conflict
 - `422` - Unprocessable Entity
@@ -80,33 +79,14 @@ All API responses should follow this structure:
 
 ### Tables
 
-#### 1. `users`
-```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email VARCHAR(255) UNIQUE NOT NULL,
-  username VARCHAR(100) UNIQUE,
-  password_hash VARCHAR(255) NOT NULL,
-  full_name VARCHAR(255),
-  avatar_url TEXT,
-  role VARCHAR(50) DEFAULT 'user', -- 'user', 'admin', 'author'
-  email_verified BOOLEAN DEFAULT false,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_username ON users(username);
-```
-
-#### 2. `blogs`
+#### 1. `blogs`
 ```sql
 CREATE TABLE blogs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug VARCHAR(255) UNIQUE NOT NULL, -- URL-friendly identifier
   title VARCHAR(500) NOT NULL,
   description TEXT,
-  author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  author VARCHAR(255), -- Author name as string (no user reference)
   cover_image_url TEXT,
   published_at TIMESTAMP,
   read_time INTEGER, -- in minutes
@@ -115,20 +95,19 @@ CREATE TABLE blogs (
   show_table_of_contents BOOLEAN DEFAULT false,
   enable_voting BOOLEAN DEFAULT true,
   enable_social_share BOOLEAN DEFAULT true,
-  status VARCHAR(50) DEFAULT 'draft', -- 'draft', 'published', 'archived'
+  enable_comments BOOLEAN DEFAULT true,
+  status VARCHAR(50) DEFAULT 'published', -- 'published', 'archived'
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  published_at TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_blogs_slug ON blogs(slug);
-CREATE INDEX idx_blogs_author_id ON blogs(author_id);
 CREATE INDEX idx_blogs_status ON blogs(status);
 CREATE INDEX idx_blogs_published_at ON blogs(published_at);
 CREATE INDEX idx_blogs_created_at ON blogs(created_at);
 ```
 
-#### 3. `blog_blocks`
+#### 2. `blog_blocks`
 ```sql
 CREATE TABLE blog_blocks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -144,7 +123,7 @@ CREATE INDEX idx_blog_blocks_blog_id ON blog_blocks(blog_id);
 CREATE INDEX idx_blog_blocks_order ON blog_blocks(blog_id, block_order);
 ```
 
-#### 4. `tags`
+#### 3. `tags`
 ```sql
 CREATE TABLE tags (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -158,7 +137,7 @@ CREATE INDEX idx_tags_slug ON tags(slug);
 CREATE INDEX idx_tags_name ON tags(name);
 ```
 
-#### 5. `blog_tags`
+#### 4. `blog_tags`
 ```sql
 CREATE TABLE blog_tags (
   blog_id UUID NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
@@ -170,7 +149,7 @@ CREATE INDEX idx_blog_tags_blog_id ON blog_tags(blog_id);
 CREATE INDEX idx_blog_tags_tag_id ON blog_tags(tag_id);
 ```
 
-#### 6. `blog_links`
+#### 5. `blog_links`
 ```sql
 CREATE TABLE blog_links (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -185,37 +164,26 @@ CREATE TABLE blog_links (
 CREATE INDEX idx_blog_links_blog_id ON blog_links(blog_id);
 ```
 
-#### 7. `blog_votes`
+#### 6. `blog_votes`
 ```sql
 CREATE TABLE blog_votes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   blog_id UUID NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  ip_address VARCHAR(45), -- IPv4 or IPv6 address
+  session_id VARCHAR(255), -- Optional session identifier
   vote_type VARCHAR(20) NOT NULL, -- 'upvote', 'downvote'
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(blog_id, user_id)
+  UNIQUE(blog_id, ip_address, session_id)
 );
 
 CREATE INDEX idx_blog_votes_blog_id ON blog_votes(blog_id);
-CREATE INDEX idx_blog_votes_user_id ON blog_votes(user_id);
+CREATE INDEX idx_blog_votes_ip ON blog_votes(ip_address);
 ```
 
-#### 8. `user_favorites`
-```sql
-CREATE TABLE user_favorites (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  blog_id UUID NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(user_id, blog_id)
-);
+**Note:** Voting is anonymous and tracked by IP address and/or session ID. Users can change their vote, but only one vote per IP/session per blog.
 
-CREATE INDEX idx_user_favorites_user_id ON user_favorites(user_id);
-CREATE INDEX idx_user_favorites_blog_id ON user_favorites(blog_id);
-```
-
-#### 9. `calendar_events`
+#### 7. `calendar_events`
 ```sql
 CREATE TABLE calendar_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -226,7 +194,6 @@ CREATE TABLE calendar_events (
   end_time TIME,
   color VARCHAR(50) DEFAULT 'blue', -- 'blue', 'green', 'purple', 'orange'
   blog_id UUID REFERENCES blogs(id) ON DELETE SET NULL,
-  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -235,160 +202,48 @@ CREATE INDEX idx_calendar_events_date ON calendar_events(event_date);
 CREATE INDEX idx_calendar_events_blog_id ON calendar_events(blog_id);
 ```
 
-#### 10. `user_settings`
+#### 8. `comments`
 ```sql
-CREATE TABLE user_settings (
+CREATE TABLE comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
-  theme_name VARCHAR(50) DEFAULT 'default',
-  color_mode VARCHAR(20) DEFAULT 'system', -- 'light', 'dark', 'system'
-  notifications JSONB DEFAULT '{}', -- Store notification preferences
+  blog_id UUID NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  comment TEXT NOT NULL,
+  ip_address VARCHAR(45), -- IPv4 or IPv6 address for moderation/abuse prevention
+  status VARCHAR(50) DEFAULT 'approved', -- 'approved', 'pending', 'spam', 'deleted'
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_user_settings_user_id ON user_settings(user_id);
+CREATE INDEX idx_comments_blog_id ON comments(blog_id);
+CREATE INDEX idx_comments_status ON comments(status);
+CREATE INDEX idx_comments_created_at ON comments(created_at);
+CREATE INDEX idx_comments_blog_status ON comments(blog_id, status);
 ```
 
-#### 11. `search_history` (Optional - for analytics)
+**Note:** Comments are anonymous and don't require user authentication. IP address is stored for moderation purposes only.
+
+#### 9. `search_history` (Optional - for analytics)
 ```sql
 CREATE TABLE search_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  ip_address VARCHAR(45), -- IPv4 or IPv6 address
   query TEXT NOT NULL,
   results_count INTEGER,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_search_history_user_id ON search_history(user_id);
+CREATE INDEX idx_search_history_ip ON search_history(ip_address);
 CREATE INDEX idx_search_history_created_at ON search_history(created_at);
 ```
 
----
-
-## Authentication & Authorization
-
-### Authentication Method
-- JWT (JSON Web Tokens)
-- Token expiration: 7 days
-- Refresh token: 30 days
-
-### Protected Routes
-Most endpoints require authentication. Include JWT token in Authorization header:
-```
-Authorization: Bearer <token>
-```
-
-### User Roles
-- **user**: Can read blogs, vote, favorite, search
-- **author**: All user permissions + create/edit own blogs
-- **admin**: Full access to all resources
+**Note:** User preferences (theme, color mode, favorites) are stored client-side in localStorage. No server-side user settings are required.
 
 ---
 
 ## API Endpoints
 
-### 1. Authentication Endpoints
-
-#### POST `/auth/register`
-Register a new user.
-
-**Request Body:**
-```json
-{
-  "email": "user@example.com",
-  "password": "securePassword123",
-  "username": "johndoe",
-  "fullName": "John Doe"
-}
-```
-
-**Response (201):**
-```json
-{
-  "success": true,
-  "data": {
-    "user": {
-      "id": "uuid",
-      "email": "user@example.com",
-      "username": "johndoe",
-      "fullName": "John Doe",
-      "role": "user"
-    },
-    "token": "jwt_token_here",
-    "refreshToken": "refresh_token_here"
-  }
-}
-```
-
-#### POST `/auth/login`
-Login user.
-
-**Request Body:**
-```json
-{
-  "email": "user@example.com",
-  "password": "securePassword123"
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "data": {
-    "user": {
-      "id": "uuid",
-      "email": "user@example.com",
-      "username": "johndoe",
-      "fullName": "John Doe",
-      "role": "user"
-    },
-    "token": "jwt_token_here",
-    "refreshToken": "refresh_token_here"
-  }
-}
-```
-
-#### POST `/auth/refresh`
-Refresh access token.
-
-**Request Body:**
-```json
-{
-  "refreshToken": "refresh_token_here"
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "data": {
-    "token": "new_jwt_token_here"
-  }
-}
-```
-
-#### POST `/auth/logout`
-Logout user (invalidate tokens).
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Logged out successfully"
-}
-```
-
----
-
-### 2. Blog Endpoints
+### 1. Blog Endpoints
 
 #### GET `/blogs`
 Get all published blog previews (for homepage).
@@ -457,8 +312,10 @@ Get a single blog by slug with full content.
       },
       "settings": {
         "enableVoting": true,
-        "enableSocialShare": true
+        "enableSocialShare": true,
+        "enableComments": true
       },
+      "commentsCount": 15, // Total number of approved comments
       "tags": ["React", "TypeScript", "Frontend", "Tutorial"],
       "links": [
         {
@@ -503,14 +360,14 @@ Get a single blog by slug with full content.
 }
 ```
 
-**Note:** `userVote` is only included if user is authenticated.
+**Note:** `userVote` is determined by the IP address and/or session ID of the requester.
 
 #### POST `/blogs`
-Create a new blog (requires `author` or `admin` role).
+Create a new blog (admin only - requires API key or admin authentication).
 
 **Headers:**
 ```
-Authorization: Bearer <token>
+X-API-Key: <admin_api_key>
 ```
 
 **Request Body:**
@@ -527,7 +384,8 @@ Authorization: Bearer <token>
   },
   "settings": {
     "enableVoting": true,
-    "enableSocialShare": true
+    "enableSocialShare": true,
+    "enableComments": true
   },
   "tags": ["React", "TypeScript"],
   "links": [
@@ -564,11 +422,11 @@ Authorization: Bearer <token>
 ```
 
 #### PUT `/blogs/:slug`
-Update a blog (requires ownership or `admin` role).
+Update a blog (admin only - requires API key or admin authentication).
 
 **Headers:**
 ```
-Authorization: Bearer <token>
+X-API-Key: <admin_api_key>
 ```
 
 **Request Body:** (Same as POST, all fields optional)
@@ -585,11 +443,11 @@ Authorization: Bearer <token>
 ```
 
 #### DELETE `/blogs/:slug`
-Delete a blog (requires ownership or `admin` role).
+Delete a blog (admin only - requires API key or admin authentication).
 
 **Headers:**
 ```
-Authorization: Bearer <token>
+X-API-Key: <admin_api_key>
 ```
 
 **Response (200):**
@@ -602,15 +460,10 @@ Authorization: Bearer <token>
 
 ---
 
-### 3. Voting Endpoints
+### 2. Voting Endpoints
 
 #### POST `/blogs/:slug/vote`
-Vote on a blog (upvote or downvote).
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
+Vote on a blog (upvote or downvote). Anonymous voting based on IP address.
 
 **Request Body:**
 ```json
@@ -628,20 +481,17 @@ Authorization: Bearer <token>
       "enabled": true,
       "upvotes": 43,
       "downvotes": 2,
-      "userVote": "upvote"
+      "userVote": "upvote" // or "downvote" or null, based on IP/session
     }
   },
   "message": "Vote recorded successfully"
 }
 ```
 
-#### DELETE `/blogs/:slug/vote`
-Remove user's vote from a blog.
+**Note:** The `userVote` field indicates the vote from the current IP/session. Users can change their vote by submitting a new vote.
 
-**Headers:**
-```
-Authorization: Bearer <token>
-```
+#### DELETE `/blogs/:slug/vote`
+Remove vote from a blog (based on IP/session).
 
 **Response (200):**
 ```json
@@ -659,76 +509,131 @@ Authorization: Bearer <token>
 }
 ```
 
+**Note:** Favorites are managed client-side using localStorage. No backend endpoints are required for favorites.
+
 ---
 
-### 4. Favorites Endpoints
+### 3. Comments Endpoints
 
-#### GET `/users/me/favorites`
-Get user's favorite blogs.
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
+#### GET `/blogs/:slug/comments`
+Get comments for a blog.
 
 **Query Parameters:**
-- `page` (optional): Page number
-- `limit` (optional): Items per page
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 20, max: 100)
+- `sort` (optional): Sort order - `newest`, `oldest` (default: `newest`)
 
 **Response (200):**
 ```json
 {
   "success": true,
   "data": {
-    "favorites": [
+    "comments": [
       {
         "id": "uuid",
-        "slug": "blog-slug",
-        "meta": { /* blog meta */ },
-        "tags": ["React", "TypeScript"],
-        "favoritedAt": "2024-01-15T10:00:00Z"
+        "name": "John Doe",
+        "comment": "Great article! Very helpful.",
+        "createdAt": "2024-01-15T10:00:00Z"
       }
     ],
-    "pagination": { /* pagination info */ }
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 45,
+      "totalPages": 3
+    }
   }
 }
 ```
 
-#### POST `/blogs/:slug/favorite`
-Add blog to favorites.
+**Note:** Only approved comments are returned. Pending, spam, and deleted comments are excluded.
 
-**Headers:**
-```
-Authorization: Bearer <token>
-```
+#### POST `/blogs/:slug/comments`
+Add a comment to a blog. No authentication required.
 
-**Response (200):**
+**Request Body:**
 ```json
 {
-  "success": true,
-  "message": "Blog added to favorites"
+  "name": "John Doe",
+  "comment": "Great article! Very helpful."
 }
 ```
 
-#### DELETE `/blogs/:slug/favorite`
-Remove blog from favorites.
+**Response (201):**
+```json
+{
+  "success": true,
+  "data": {
+    "comment": {
+      "id": "uuid",
+      "name": "John Doe",
+      "comment": "Great article! Very helpful.",
+      "createdAt": "2024-01-15T10:00:00Z"
+    }
+  },
+  "message": "Comment posted successfully"
+}
+```
+
+**Note:** 
+- Comments are automatically approved by default
+- IP address is captured server-side for moderation purposes
+- Consider implementing rate limiting (e.g., max 5 comments per IP per hour)
+- Consider implementing spam detection
+
+#### DELETE `/blogs/:slug/comments/:commentId`
+Delete a comment (admin only - requires API key or admin authentication).
 
 **Headers:**
 ```
-Authorization: Bearer <token>
+X-API-Key: <admin_api_key>
 ```
 
 **Response (200):**
 ```json
 {
   "success": true,
-  "message": "Blog removed from favorites"
+  "message": "Comment deleted successfully"
+}
+```
+
+**Alternative:** Soft delete by updating status to 'deleted' instead of hard delete.
+
+#### PUT `/blogs/:slug/comments/:commentId/status`
+Update comment status (admin only - for moderation).
+
+**Headers:**
+```
+X-API-Key: <admin_api_key>
+```
+
+**Request Body:**
+```json
+{
+  "status": "approved" // or "pending", "spam", "deleted"
+}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "comment": {
+      "id": "uuid",
+      "name": "John Doe",
+      "comment": "Great article!",
+      "status": "approved",
+      "createdAt": "2024-01-15T10:00:00Z"
+    }
+  },
+  "message": "Comment status updated successfully"
 }
 ```
 
 ---
 
-### 5. Search Endpoints
+### 4. Search Endpoints
 
 #### GET `/search`
 Search blogs.
@@ -772,7 +677,7 @@ Search blogs.
 
 ---
 
-### 6. Tags Endpoints
+### 5. Tags Endpoints
 
 #### GET `/tags`
 Get all tags.
@@ -825,7 +730,7 @@ Get blogs by tag.
 
 ---
 
-### 7. Calendar Events Endpoints
+### 6. Calendar Events Endpoints
 
 #### GET `/calendar/events`
 Get calendar events.
@@ -861,11 +766,11 @@ Get calendar events.
 ```
 
 #### POST `/calendar/events`
-Create a calendar event (requires authentication).
+Create a calendar event (admin only - requires API key or admin authentication).
 
 **Headers:**
 ```
-Authorization: Bearer <token>
+X-API-Key: <admin_api_key>
 ```
 
 **Request Body:**
@@ -892,11 +797,11 @@ Authorization: Bearer <token>
 ```
 
 #### PUT `/calendar/events/:id`
-Update a calendar event.
+Update a calendar event (admin only - requires API key or admin authentication).
 
 **Headers:**
 ```
-Authorization: Bearer <token>
+X-API-Key: <admin_api_key>
 ```
 
 **Request Body:** (Same as POST, all fields optional)
@@ -912,11 +817,11 @@ Authorization: Bearer <token>
 ```
 
 #### DELETE `/calendar/events/:id`
-Delete a calendar event.
+Delete a calendar event (admin only - requires API key or admin authentication).
 
 **Headers:**
 ```
-Authorization: Bearer <token>
+X-API-Key: <admin_api_key>
 ```
 
 **Response (200):**
@@ -927,130 +832,7 @@ Authorization: Bearer <token>
 }
 ```
 
----
-
-### 8. User Settings Endpoints
-
-#### GET `/users/me/settings`
-Get user settings.
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "data": {
-    "settings": {
-      "themeName": "default",
-      "colorMode": "system",
-      "notifications": {
-        "email": true,
-        "blogUpdates": true,
-        "sms": false,
-        "push": true,
-        "dailyReports": true,
-        "weeklyReports": false
-      }
-    }
-  }
-}
-```
-
-#### PUT `/users/me/settings`
-Update user settings.
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
-
-**Request Body:**
-```json
-{
-  "themeName": "twitter", // optional
-  "colorMode": "dark", // optional
-  "notifications": { // optional
-    "email": true,
-    "blogUpdates": true,
-    "sms": false,
-    "push": true,
-    "dailyReports": true,
-    "weeklyReports": false
-  }
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "data": {
-    "settings": { /* updated settings */ }
-  },
-  "message": "Settings updated successfully"
-}
-```
-
----
-
-### 9. User Profile Endpoints
-
-#### GET `/users/me`
-Get current user profile.
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "data": {
-    "user": {
-      "id": "uuid",
-      "email": "user@example.com",
-      "username": "johndoe",
-      "fullName": "John Doe",
-      "avatarUrl": "https://...",
-      "role": "user",
-      "createdAt": "2024-01-01T00:00:00Z"
-    }
-  }
-}
-```
-
-#### PUT `/users/me`
-Update user profile.
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
-
-**Request Body:**
-```json
-{
-  "username": "newusername", // optional
-  "fullName": "New Name", // optional
-  "avatarUrl": "https://..." // optional
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "data": {
-    "user": { /* updated user object */ }
-  }
-}
-```
+**Note:** User settings (theme, color mode, favorites) are managed client-side using localStorage. No backend endpoints are required for user settings or profiles.
 
 ---
 
@@ -1135,8 +917,7 @@ The `content` JSONB field in `blog_blocks` should contain different structures b
 | Code | Description |
 |------|-------------|
 | `VALIDATION_ERROR` | Request validation failed |
-| `UNAUTHORIZED` | Authentication required |
-| `FORBIDDEN` | Insufficient permissions |
+| `UNAUTHORIZED` | Invalid or missing API key (admin endpoints only) |
 | `NOT_FOUND` | Resource not found |
 | `CONFLICT` | Resource conflict (e.g., duplicate slug) |
 | `RATE_LIMIT_EXCEEDED` | Too many requests |
@@ -1169,12 +950,14 @@ The `content` JSONB field in `blog_blocks` should contain different structures b
 - `description`: Optional, max 2000 characters
 - `readTime`: Optional, positive integer
 - `layout.type`: Must be "single-column" or "two-column"
-- `status`: Must be "draft", "published", or "archived"
+- `status`: Must be "published" or "archived"
+- `settings.enableComments`: Boolean, default true
 
-### User
-- `email`: Required, valid email format, unique
-- `password`: Required, min 8 characters, must contain letter and number
-- `username`: Optional, 3-50 characters, alphanumeric and underscores only, unique
+### Comment
+- `name`: Required, 1-255 characters
+- `comment`: Required, 1-5000 characters
+- `status`: Must be "approved", "pending", "spam", or "deleted"
+
 
 ### Vote
 - `voteType`: Must be "upvote" or "downvote"
@@ -1198,22 +981,22 @@ All list endpoints should support pagination:
 
 ### 2. Rate Limiting
 - Public endpoints: 100 requests per minute per IP
-- Authenticated endpoints: 200 requests per minute per user
+- Admin endpoints: 50 requests per minute per API key
 - Use appropriate HTTP headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
 
 ### 3. CORS
 - Allow requests from frontend domain
-- Support credentials (cookies, authorization headers)
+- No authentication credentials required
 
 ### 4. File Uploads
 - Support image uploads for:
-  - User avatars
   - Blog cover images
   - Blog block images
 - Maximum file size: 5MB
 - Allowed formats: JPEG, PNG, WebP
 - Store files in cloud storage (S3, Cloudinary, etc.) or local filesystem
 - Return public URLs in responses
+- Admin only (requires API key)
 
 ### 5. Slug Generation
 - Auto-generate slugs from titles if not provided
@@ -1231,57 +1014,62 @@ All list endpoints should support pagination:
 - Support fuzzy matching
 - Return relevance scores
 
-### 8. Caching
+### 8. Comments Moderation
+- Implement rate limiting: max 5 comments per IP per hour
+- Consider implementing spam detection (keyword filtering, link detection)
+- Store IP addresses for abuse prevention
+- Support comment moderation workflow (approve, reject, mark as spam)
+- Optional: Implement CAPTCHA for comment submission
+
+### 9. Caching
 - Cache frequently accessed data:
   - Blog previews (5 minutes)
   - Popular tags (15 minutes)
   - User settings (until updated)
-- Use Redis or similar
+- Use local caching
 - Include cache headers in responses
 
-### 9. Logging
+### 10. Logging
 - Log all API requests
 - Log errors with stack traces
 - Include request ID for tracing
 
-### 10. Database Migrations
-- Use migration tool (e.g., Knex.js, TypeORM migrations)
+### 11. Database Migrations
+- Use migration tool
 - Version control all schema changes
 - Support rollback
 
-### 11. Environment Variables
+### 12. Environment Variables
 Required environment variables:
 ```
 DATABASE_URL=postgresql://...
-JWT_SECRET=...
-JWT_REFRESH_SECRET=...
+ADMIN_API_KEY=... # For admin operations (blog creation, updates, etc.)
 NODE_ENV=production|development
 PORT=3000
 CORS_ORIGIN=https://yourdomain.com
 UPLOAD_MAX_SIZE=5242880
-REDIS_URL=redis://...
 ```
 
-### 12. API Documentation
+### 13. API Documentation
 - Generate OpenAPI/Swagger documentation
 - Include request/response examples
 - Document all error codes
 
-### 13. Testing
+### 14. Testing
 - Unit tests for business logic
 - Integration tests for API endpoints
 - Test coverage: minimum 80%
 
-### 14. Security
-- Hash passwords using bcrypt (cost factor: 10)
+### 15. Security
 - Sanitize all user inputs
 - Use parameterized queries (prevent SQL injection)
-- Validate JWT tokens
-- Implement CSRF protection
+- Validate API keys for admin endpoints
+- Implement rate limiting to prevent abuse
 - Use HTTPS in production
-- Set secure cookie flags
+- Validate IP addresses for voting (prevent spoofing)
+- Consider implementing session-based tracking for better vote accuracy
 
-### 15. Performance
+### 16. Performance
 - Database query optimization
 - Use indexes on frequently queried columns
 - Implement connection pooling
@@ -1291,8 +1079,8 @@ REDIS_URL=redis://...
 ---
 
 ## Future Enhancements
-
-### AI Chat Integration
+- V2  will be implemented in 2nd version you can make room for it 
+### AI Chat Integration (V2)
 - Endpoint: `POST /ai/chat`
 - Integrate with AI service (OpenAI, Anthropic, etc.)
 - Context: Provide blog content for AI responses
@@ -1304,16 +1092,19 @@ REDIS_URL=redis://...
 - Track popular content
 - User engagement metrics
 
-### Comments System
-- Add comments to blogs
-- Nested replies
-- Moderation
+### Comments System (Already Implemented)
+- ✅ Add comments to blogs
+- ✅ Anonymous comments (name only, no authentication)
+- ✅ Comment moderation (approve, reject, spam)
+- ⏳ Nested replies (future enhancement)
 
-### Email Notifications
+### Email Notifications (V2)
 - New blog notifications
 - Weekly digests
 - Comment replies
 
+### Email subscription (V2)
+- collect mail id's for email notification
 ---
 
 ## Notes for Backend Team
@@ -1322,12 +1113,20 @@ REDIS_URL=redis://...
 2. **Date Format**: Always use ISO 8601 format (e.g., "2024-01-15T10:00:00Z")
 3. **Slug Format**: Generate from title: lowercase, hyphens, no special chars
 4. **Block Order**: Maintain order using `block_order` field
-5. **Vote Updates**: When user changes vote, update existing record, don't create new
+5. **Vote Updates**: When IP/session changes vote, update existing record, don't create new
 6. **Soft Deletes**: Consider soft deletes for blogs (add `deleted_at` column)
 7. **Image URLs**: Store full URLs, not relative paths
 8. **Search**: Prioritize title matches, then description, then tags
 9. **Pagination**: Always include total count for proper pagination UI
 10. **Error Messages**: Make error messages user-friendly and actionable
+11. **No Authentication**: All public endpoints are open. Only admin operations require API key
+12. **Voting**: Track by IP address and optional session ID. One vote per IP/session per blog
+13. **Favorites**: Managed client-side in localStorage - no backend storage needed
+14. **User Settings**: Managed client-side in localStorage - no backend storage needed
+15. **Author Field**: Store as simple string in blogs table, not a foreign key
+16. **Comments**: Anonymous comments with name only. IP address stored for moderation. Rate limit: 5 comments per IP per hour
+17. **Comment Status**: Default to "approved". Support "pending", "spam", "deleted" for moderation
+18. **Comments Count**: Include `commentsCount` in blog responses for quick display
 
 ---
 
@@ -1336,4 +1135,4 @@ REDIS_URL=redis://...
 For questions or clarifications, please contact the frontend team.
 
 **Document Version:** 1.0  
-**Last Updated:** 2024
+**Last Updated:** 2026
