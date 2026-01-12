@@ -14,6 +14,7 @@ import * as React from "react";
 import type { Blog } from "@/types/blog";
 import { BlogRenderer } from "@/components/blog/BlogRenderer";
 import { Voting } from "@/components/blog/Voting";
+import { Comments } from "@/components/blog/Comments";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -534,6 +535,11 @@ export function BlogPage({ blog, onVote }: BlogPageProps) {
             <BlogRenderer blog={blog} />
           </div>
         </div>
+
+        {/* Comments Section */}
+        {blogId && (
+          <Comments blogId={blogId} enabled={blog.settings.enableComments} />
+        )}
 
         </div>
       </div>

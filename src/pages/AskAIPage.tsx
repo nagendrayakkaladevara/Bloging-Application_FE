@@ -7,6 +7,7 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -443,9 +444,15 @@ export function AskAIPage({ blogs }: AskAIPageProps) {
                           {message.role === "user" && (
                             <User className="h-3 w-3 sm:h-4 sm:w-4 shrink-0 mt-0.5" />
                           )}
-                          <p className="text-xs sm:text-sm md:text-base whitespace-pre-wrap wrap-break-word leading-relaxed">
-                            {message.content}
-                          </p>
+                          {message.role === "assistant" ? (
+                            <div className="text-xs sm:text-sm md:text-base leading-relaxed [&>p]:my-2 [&>p]:leading-relaxed [&>strong]:font-semibold [&>ul]:my-2 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:space-y-1 [&>ol]:my-2 [&>ol]:list-decimal [&>ol]:ml-4 [&>ol]:space-y-1 [&>li]:my-1 [&>h1]:text-lg [&>h1]:font-semibold [&>h1]:my-3 [&>h2]:text-base [&>h2]:font-semibold [&>h2]:my-3 [&>h3]:text-sm [&>h3]:font-semibold [&>h3]:my-3 [&>code]:text-xs [&>code]:bg-muted [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded [&>code]:font-mono [&>pre]:bg-muted [&>pre]:p-2 [&>pre]:rounded [&>pre]:overflow-x-auto [&>pre>code]:bg-transparent [&>pre>code]:p-0 [&>a]:text-primary [&>a]:no-underline hover:[&>a]:underline [&>blockquote]:border-l-4 [&>blockquote]:border-border [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-2">
+                              <ReactMarkdown>{message.content}</ReactMarkdown>
+                            </div>
+                          ) : (
+                            <p className="text-xs sm:text-sm md:text-base whitespace-pre-wrap wrap-break-word leading-relaxed">
+                              {message.content}
+                            </p>
+                          )}
                         </div>
                         <p className="text-[10px] sm:text-xs opacity-70 mt-1.5 sm:mt-2">
                           {message.timestamp.toLocaleTimeString([], {

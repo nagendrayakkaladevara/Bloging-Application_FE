@@ -25,6 +25,7 @@ export const mockBlogs: Blog[] = [
     settings: {
       enableVoting: true,
       enableSocialShare: true,
+      enableComments: true,
     },
     tags: ["React", "TypeScript", "Frontend", "Tutorial"],
     links: [
@@ -137,6 +138,7 @@ export const mockBlogs: Blog[] = [
     settings: {
       enableVoting: true,
       enableSocialShare: true,
+      enableComments: true,
     },
     tags: ["CSS", "Tailwind", "Design", "Frontend"],
     links: [],
@@ -211,6 +213,7 @@ export const mockBlogs: Blog[] = [
     settings: {
       enableVoting: false,
       enableSocialShare: true,
+      enableComments: true,
     },
     tags: ["Architecture", "React", "Best Practices"],
     links: [
@@ -318,6 +321,7 @@ export const mockBlogs: Blog[] = [
     settings: {
       enableVoting: true,
       enableSocialShare: true,
+      enableComments: true,
     },
     tags: ["JavaScript", "ES6", "Web Development", "Programming"],
     links: [
@@ -417,6 +421,7 @@ console.log(name); // "John"`,
     settings: {
       enableVoting: true,
       enableSocialShare: true,
+      enableComments: true,
     },
     tags: ["CSS", "Grid", "Layout", "Web Design"],
     links: [
@@ -514,6 +519,7 @@ console.log(name); // "John"`,
     settings: {
       enableVoting: true,
       enableSocialShare: true,
+      enableComments: true,
     },
     tags: ["Node.js", "Express", "API", "Backend", "REST"],
     links: [
@@ -627,6 +633,7 @@ app.listen(PORT, () => {
     settings: {
       enableVoting: true,
       enableSocialShare: true,
+      enableComments: true,
     },
     tags: ["Docker", "DevOps", "Containers", "Deployment"],
     links: [
@@ -725,6 +732,7 @@ CMD ["npm", "start"]`,
     settings: {
       enableVoting: true,
       enableSocialShare: true,
+      enableComments: true,
     },
     tags: ["Git", "Version Control", "Development", "Tools"],
     links: [
