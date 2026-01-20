@@ -45,12 +45,33 @@ export function BlogPage({ blog, onVote }: BlogPageProps) {
   const { open, toggleSidebar } = useSidebar();
   const { toggleFavorite, isFavorite } = useFavorites();
   const [copiedLinkIndex, setCopiedLinkIndex] = React.useState<number | null>(null);
+  const [votingState, setVotingState] = React.useState(blog?.voting);
 
-  const handleVote = (vote: "upvote" | "downvote") => {
-    if (onVote && blogId) {
-      onVote(blogId, vote);
+  // Update voting state when blog changes
+  React.useEffect(() => {
+    if (blog) {
+      setVotingState(blog.voting);
     }
-  };
+  }, [blog]);
+
+  const handleVoteChange = React.useCallback((newVoting: typeof blog.voting) => {
+    // Only update if values actually changed to prevent unnecessary re-renders
+    setVotingState((prev) => {
+      if (
+        prev?.upvotes !== newVoting.upvotes ||
+        prev?.downvotes !== newVoting.downvotes ||
+        prev?.userVote !== newVoting.userVote ||
+        prev?.enabled !== newVoting.enabled
+      ) {
+        return newVoting;
+      }
+      return prev;
+    });
+    if (onVote && blogId) {
+      // Keep the old onVote handler for backward compatibility
+      // The actual voting is handled by the Voting component via API
+    }
+  }, [onVote, blogId]);
 
   const handleFavoriteToggle = () => {
     if (blogId) {
@@ -299,8 +320,8 @@ export function BlogPage({ blog, onVote }: BlogPageProps) {
               transition={{ duration: 0.3, delay: 0.2 }}
             >
               {/* Voting Section - Left */}
-              {blog.settings.enableVoting ? (
-                <Voting voting={blog.voting} onVote={handleVote} />
+              {blog.settings.enableVoting && votingState ? (
+                <Voting voting={votingState} blogSlug={blogId || ""} onVoteChange={handleVoteChange} />
               ) : (
                 <div />
               )}
@@ -354,8 +375,8 @@ export function BlogPage({ blog, onVote }: BlogPageProps) {
               transition={{ duration: 0.3, delay: 0.2 }}
             >
               {/* Voting Section */}
-              {blog.settings.enableVoting && (
-                <Voting voting={blog.voting} onVote={handleVote} />
+              {blog.settings.enableVoting && votingState && (
+                <Voting voting={votingState} blogSlug={blogId || ""} onVoteChange={handleVoteChange} />
               )}
 
               {/* Favorite Button */}
@@ -538,7 +559,7 @@ export function BlogPage({ blog, onVote }: BlogPageProps) {
 
         {/* Comments Section */}
         {blogId && (
-          <Comments blogId={blogId} enabled={blog.settings.enableComments} />
+          <Comments blogSlug={blogId} enabled={blog.settings.enableComments} />
         )}
 
         </div>

@@ -27,12 +27,14 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface HomePageProps {
   blogs: BlogPreview[];
+  loading?: boolean;
 }
 
-export function HomePage({ blogs }: HomePageProps) {
+export function HomePage({ blogs, loading = false }: HomePageProps) {
   const { openSearch } = useSearch();
   const { open } = useSidebar();
   const [isMac, setIsMac] = useState(false);
@@ -101,7 +103,29 @@ export function HomePage({ blogs }: HomePageProps) {
             <div className="absolute inset-0 z-0 bg-blog-grid" />
             {/* Blog Content */}
             <div className="container mx-auto px-4 py-12 max-w-7xl relative z-10">
-              {blogs.length === 0 ? (
+              {loading ? (
+                <div className="space-y-4">
+                  {[...Array(5)].map((_, index) => (
+                    <Card key={index} className="bg-card overflow-hidden mb-3">
+                      <div className="flex flex-row">
+                        {/* Left side - Content */}
+                        <div className="flex-1 p-4 sm:p-6">
+                          <Skeleton className="h-6 sm:h-7 w-3/4 mb-3 sm:mb-4" />
+                          <div className="flex flex-row gap-4 sm:gap-6">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-4 w-20" />
+                          </div>
+                        </div>
+                        
+                        {/* Right side - Image skeleton - Hidden on mobile */}
+                        <div className="hidden sm:block w-48 h-32 shrink-0">
+                          <Skeleton className="w-full h-full" />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : blogs.length === 0 ? (
                 <EmptyBlogState />
               ) : (
                 <div className="space-y-4">

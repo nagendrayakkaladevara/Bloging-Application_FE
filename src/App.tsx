@@ -4,6 +4,7 @@
  * Sets up routing and manages application state.
  */
 
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HomePage } from "@/pages/HomePage";
 import { BlogPageWrapper } from "@/components/BlogPageWrapper";
@@ -11,11 +12,14 @@ import { CalendarPage } from "@/pages/CalendarPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { HelpPage } from "@/pages/HelpPage";
 import { AskAIPage } from "@/pages/AskAIPage";
-import { getBlogPreviews } from "@/data/mockBlogs";
-import { useState, useEffect } from "react";
+import { useBlogs } from "@/hooks/useBlogs";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { BlogSearchDialog } from "@/components/BlogSearchDialog";
 import { useSearch } from "@/contexts/SearchContext";
+import { cleanupExpiredCache } from "@/lib/cache/blogCache";
+import { cleanupExpiredCommentsCache } from "@/lib/cache/commentsCache";
+import { Toaster } from "@/components/ui/toaster";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
 
 function GlobalKeyboardShortcuts() {
   const { openSearch } = useSearch();
@@ -39,7 +43,20 @@ function GlobalKeyboardShortcuts() {
 }
 
 function App() {
-  const [blogs] = useState(getBlogPreviews());
+  const { blogs, loading } = useBlogs();
+
+  // Clean up expired cache entries every 5 minutes
+  useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      cleanupExpiredCache();
+      cleanupExpiredCommentsCache();
+    }, 5 * 60 * 1000); // 5 minutes
+
+    // Clean up on unmount
+    return () => {
+      clearInterval(cleanupInterval);
+    };
+  }, []);
 
   const handleVote = () => {
     // Vote handling logic can be implemented here
@@ -47,15 +64,17 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <GlobalKeyboardShortcuts />
-      <BlogSearchDialog blogs={blogs} />
-      <Routes>
+    <FavoritesProvider>
+      <BrowserRouter>
+        <GlobalKeyboardShortcuts />
+        <BlogSearchDialog blogs={blogs} />
+        <Toaster />
+        <Routes>
         <Route
           path="/"
           element={
             <SidebarProvider defaultOpen={false}>
-              <HomePage blogs={blogs} />
+              <HomePage blogs={blogs} loading={loading} />
             </SidebarProvider>
           }
         />
@@ -63,7 +82,7 @@ function App() {
           path="/blog/:blogId"
           element={
             <SidebarProvider defaultOpen={false}>
-              <BlogPageWrapper onVote={handleVote} blogs={blogs} />
+              <BlogPageWrapper blogs={blogs} onVote={handleVote} />
             </SidebarProvider>
           }
         />
@@ -101,6 +120,7 @@ function App() {
         />
       </Routes>
     </BrowserRouter>
+    </FavoritesProvider>
   );
 }
 
