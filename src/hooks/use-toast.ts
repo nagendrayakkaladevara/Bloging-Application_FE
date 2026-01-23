@@ -5,7 +5,7 @@
  */
 
 import * as React from "react";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
 export interface Toast {
   id: string;

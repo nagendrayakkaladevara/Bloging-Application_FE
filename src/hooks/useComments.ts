@@ -27,6 +27,7 @@ export function useComments(blogSlug: string | undefined, enabled: boolean) {
       try {
         setLoading(true);
         setError(null);
+        if (!blogSlug) return;
         const data = await getComments(blogSlug);
         
         if (!cancelled) {

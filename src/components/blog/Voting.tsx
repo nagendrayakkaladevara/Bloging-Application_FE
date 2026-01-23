@@ -135,16 +135,19 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
     // Show toast immediately (optimistic feedback - no need to wait for API)
     if (isRemovingVote) {
       toast({
+        id: `vote-removed-${Date.now()}`,
         title: "Vote removed",
         duration: 3000,
       });
     } else if (voteType === "upvote") {
       toast({
+        id: `vote-upvote-${Date.now()}`,
         title: "Thank you for the like!",
         duration: 3000,
       });
     } else {
       toast({
+        id: `vote-downvote-${Date.now()}`,
         title: "Thank you for the feedback!",
         duration: 3000,
       });
@@ -164,6 +167,7 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
       // Don't show error for network issues that might be temporary
       if (errorMessage.includes("timeout") || errorMessage.includes("network")) {
         toast({
+          id: `vote-error-network-${Date.now()}`,
           title: "Connection issue",
           description: "Please check your internet connection and try again.",
           variant: "destructive",
@@ -171,6 +175,7 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
         });
       } else if (!errorMessage.includes("cancelled") && !errorMessage.includes("aborted")) {
         toast({
+          id: `vote-error-${Date.now()}`,
           title: "Error",
           description: errorMessage || "Failed to record your vote. Please try again.",
           variant: "destructive",

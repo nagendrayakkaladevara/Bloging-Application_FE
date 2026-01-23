@@ -7,7 +7,7 @@
 import { apiClient } from "../api-client";
 import type { CalendarEvent } from "@/types/calendar";
 import { transformCalendarEvent } from "./transformers";
-import type { ApiCalendarEvent, ApiCalendarEventsResponse } from "./types";
+import type { ApiCalendarEventsResponse } from "./types";
 
 /**
  * Get all calendar events

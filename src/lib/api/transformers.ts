@@ -4,7 +4,7 @@
  * Transform API responses to match frontend types.
  */
 
-import type { Blog, BlogPreview, BlogBlock } from "@/types/blog";
+import type { Blog, BlogPreview, BlogBlock, SocialPlatform } from "@/types/blog";
 import type { CalendarEvent } from "@/types/calendar";
 import type { Comment } from "@/components/blog/Comments";
 import type {
@@ -107,7 +107,12 @@ export function transformBlog(apiBlog: ApiBlog): Blog {
     links: apiBlog.links,
     blocks: apiBlog.blocks.map(transformBlock),
     voting: apiBlog.voting,
-    socialShare: apiBlog.socialShare,
+    socialShare: {
+      enabled: apiBlog.socialShare.enabled,
+      platforms: apiBlog.socialShare.platforms.filter((p): p is SocialPlatform =>
+        ["twitter", "facebook", "linkedin", "reddit", "copy"].includes(p)
+      ),
+    },
   };
 }
 

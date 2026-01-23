@@ -27,7 +27,7 @@ interface CommentsProps {
 }
 
 export function Comments({ blogSlug, enabled }: CommentsProps) {
-  const { comments, loading, submitting, createComment } = useComments(blogSlug, enabled);
+  const { comments, submitting, createComment } = useComments(blogSlug, enabled);
   const [name, setName] = React.useState("");
   const [comment, setComment] = React.useState("");
   const [isFormFocused, setIsFormFocused] = React.useState(false);

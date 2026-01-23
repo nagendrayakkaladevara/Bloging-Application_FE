@@ -9,7 +9,6 @@ import type { Blog, BlogPreview } from "@/types/blog";
 import { transformBlog, transformBlogPreview } from "./transformers";
 import type {
   ApiBlog,
-  ApiBlogPreview,
   ApiPaginatedBlogs,
 } from "./types";
 import type { PaginatedResponse } from "../api-client";
