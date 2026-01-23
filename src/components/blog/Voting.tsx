@@ -73,8 +73,7 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
         });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiVoting, error, loading, isProcessing]);
+  }, [apiVoting, error, loading, isProcessing, onVoteChange, voting]);
 
   // Use API voting if available, otherwise fall back to prop voting
   // Handle null/undefined states gracefully

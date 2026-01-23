@@ -220,7 +220,7 @@ function useToast() {
         listeners.splice(index, 1);
       }
     };
-  }, [state]);
+  }, []); // Empty dependency array - listener registration should happen only once
 
   return {
     ...state,
