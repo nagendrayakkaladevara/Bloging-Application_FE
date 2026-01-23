@@ -32,20 +32,16 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
   const [view, setView] = useState<View>("month");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Fetch calendar events from API
   useEffect(() => {
     async function fetchEvents() {
       try {
-        setLoading(true);
         const events = await getCalendarEvents();
         setCalendarEvents(events);
       } catch (error) {
         console.error("Failed to fetch calendar events:", error);
         setCalendarEvents([]);
-      } finally {
-        setLoading(false);
       }
     }
 

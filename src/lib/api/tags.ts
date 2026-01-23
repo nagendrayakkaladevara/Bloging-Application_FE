@@ -8,7 +8,6 @@ import { apiClient } from "../api-client";
 import type { BlogPreview } from "@/types/blog";
 import { transformBlogPreview } from "./transformers";
 import type {
-  ApiTag,
   ApiTagsResponse,
   ApiTagBlogsResponse,
 } from "./types";

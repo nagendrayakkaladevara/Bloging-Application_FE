@@ -26,6 +26,7 @@ export function useBlog(blogId: string | undefined) {
       try {
         setLoading(true);
         setError(null);
+        if (!blogId) return;
         const data = await getBlogById(blogId);
         
         if (!cancelled) {

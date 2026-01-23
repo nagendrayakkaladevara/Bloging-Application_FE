@@ -18,7 +18,7 @@ export interface ToastProps {
 }
 
 const Toast = React.forwardRef<HTMLDivElement, ToastProps & React.HTMLAttributes<HTMLDivElement>>(
-  ({ id, title, description, variant = "default", onClose, className, ...props }, ref) => {
+  ({ title, description, variant = "default", onClose, className, ...props }, ref) => {
     return (
       <div
         ref={ref}

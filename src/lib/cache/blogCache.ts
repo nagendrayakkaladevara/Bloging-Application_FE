@@ -74,11 +74,11 @@ export function getCacheStats() {
   
   return {
     totalEntries: entries.length,
-    validEntries: entries.filter(([_, cached]) => {
+    validEntries: entries.filter(([, cached]) => {
       const age = now - cached.timestamp;
       return age <= CACHE_EXPIRATION_MS;
     }).length,
-    expiredEntries: entries.filter(([_, cached]) => {
+    expiredEntries: entries.filter(([, cached]) => {
       const age = now - cached.timestamp;
       return age > CACHE_EXPIRATION_MS;
     }).length,

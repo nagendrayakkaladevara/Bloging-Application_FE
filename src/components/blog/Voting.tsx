@@ -73,8 +73,7 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
         });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiVoting, error, loading, isProcessing]);
+  }, [apiVoting, error, loading, isProcessing, onVoteChange, voting]);
 
   // Use API voting if available, otherwise fall back to prop voting
   // Handle null/undefined states gracefully
@@ -101,6 +100,19 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
     voting.userVote,
     voting.enabled,
   ]);
+
+  // Memoize vote states to prevent unnecessary re-renders
+  const isUpvoted = useMemo(() => currentVoting.userVote === "upvote", [currentVoting.userVote]);
+  const isDownvoted = useMemo(() => currentVoting.userVote === "downvote", [currentVoting.userVote]);
+  const isDisabled = useMemo(() => loading || isProcessing || !currentVoting.enabled, [loading, isProcessing, currentVoting.enabled]);
+
+  // Show error state if there's an error
+  useEffect(() => {
+    if (error && !loading) {
+      // Error is already handled in handleVote, but we can add additional handling here if needed
+      console.error("Voting error:", error);
+    }
+  }, [error, loading]);
 
   // Don't render if voting is disabled or voting state is invalid
   if (!currentVoting.enabled || !currentVoting) {
@@ -135,16 +147,19 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
     // Show toast immediately (optimistic feedback - no need to wait for API)
     if (isRemovingVote) {
       toast({
+        id: `vote-removed-${Date.now()}`,
         title: "Vote removed",
         duration: 3000,
       });
     } else if (voteType === "upvote") {
       toast({
+        id: `vote-upvote-${Date.now()}`,
         title: "Thank you for the like!",
         duration: 3000,
       });
     } else {
       toast({
+        id: `vote-downvote-${Date.now()}`,
         title: "Thank you for the feedback!",
         duration: 3000,
       });
@@ -164,6 +179,7 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
       // Don't show error for network issues that might be temporary
       if (errorMessage.includes("timeout") || errorMessage.includes("network")) {
         toast({
+          id: `vote-error-network-${Date.now()}`,
           title: "Connection issue",
           description: "Please check your internet connection and try again.",
           variant: "destructive",
@@ -171,6 +187,7 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
         });
       } else if (!errorMessage.includes("cancelled") && !errorMessage.includes("aborted")) {
         toast({
+          id: `vote-error-${Date.now()}`,
           title: "Error",
           description: errorMessage || "Failed to record your vote. Please try again.",
           variant: "destructive",
@@ -185,19 +202,6 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
       }, 300);
     }
   };
-
-  // Memoize vote states to prevent unnecessary re-renders
-  const isUpvoted = useMemo(() => currentVoting.userVote === "upvote", [currentVoting.userVote]);
-  const isDownvoted = useMemo(() => currentVoting.userVote === "downvote", [currentVoting.userVote]);
-  const isDisabled = useMemo(() => loading || isProcessing || !currentVoting.enabled, [loading, isProcessing, currentVoting.enabled]);
-
-  // Show error state if there's an error
-  useEffect(() => {
-    if (error && !loading) {
-      // Error is already handled in handleVote, but we can add additional handling here if needed
-      console.error("Voting error:", error);
-    }
-  }, [error, loading]);
 
   return (
     <motion.div

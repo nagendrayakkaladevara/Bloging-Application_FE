@@ -11,7 +11,7 @@
 
 import { useParams, Link } from "react-router-dom";
 import * as React from "react";
-import type { Blog } from "@/types/blog";
+import type { Blog, BlogVoting } from "@/types/blog";
 import { BlogRenderer } from "@/components/blog/BlogRenderer";
 import { Voting } from "@/components/blog/Voting";
 import { Comments } from "@/components/blog/Comments";
@@ -54,7 +54,7 @@ export function BlogPage({ blog, onVote }: BlogPageProps) {
     }
   }, [blog]);
 
-  const handleVoteChange = React.useCallback((newVoting: typeof blog.voting) => {
+  const handleVoteChange = React.useCallback((newVoting: BlogVoting) => {
     // Only update if values actually changed to prevent unnecessary re-renders
     setVotingState((prev) => {
       if (
