@@ -4,7 +4,7 @@
  * Production-ready API client with error handling, retry logic, and type safety.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+const API_BASE_URL = https://bloging-application-be-ysainagendra.vercel.app/api/v1
 
 export interface ApiResponse<T> {
   success: boolean;
