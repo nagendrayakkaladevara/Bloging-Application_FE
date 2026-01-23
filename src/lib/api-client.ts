@@ -4,7 +4,7 @@
  * Production-ready API client with error handling, retry logic, and type safety.
  */
 
-const API_BASE_URL = https://bloging-application-be-ysainagendra.vercel.app/api/v1
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''; 
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -28,14 +28,21 @@ export interface PaginatedResponse<T> {
 }
 
 export class ApiError extends Error {
+  public code: string;
+  public statusCode?: number;
+  public details?: unknown;
+
   constructor(
-    public code: string,
+    code: string,
     message: string,
-    public statusCode?: number,
-    public details?: unknown
+    statusCode?: number,
+    details?: unknown
   ) {
     super(message);
     this.name = 'ApiError';
+    this.code = code;
+    this.statusCode = statusCode;
+    this.details = details;
   }
 }
 
