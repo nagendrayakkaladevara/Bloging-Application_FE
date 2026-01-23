@@ -4,7 +4,7 @@
  * Displays a full calendar with events using react-big-calendar.
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import type { View } from "react-big-calendar";
 import { format } from "date-fns";
@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { CalendarEvent } from "@/types/calendar";
-import { mockCalendarEvents } from "@/data/mockCalendarEvents";
+import { getCalendarEvents } from "@/lib/api";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import moment from "moment";
@@ -31,10 +31,30 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [view, setView] = useState<View>("month");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch calendar events from API
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        setLoading(true);
+        const events = await getCalendarEvents();
+        setCalendarEvents(events);
+      } catch (error) {
+        console.error("Failed to fetch calendar events:", error);
+        setCalendarEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchEvents();
+  }, []);
 
   // Convert our events to react-big-calendar format
   const events = useMemo(() => {
-    return mockCalendarEvents.map((event) => {
+    return calendarEvents.map((event) => {
       const startDate = new Date(event.date);
       if (event.startTime) {
         const [hours, minutes] = event.startTime.split(":").map(Number);
@@ -59,7 +79,7 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
         resource: event, // Store original event data
       };
     });
-  }, []);
+  }, [calendarEvents]);
 
   const handleSelectSlot = ({ start }: { start: Date }) => {
     setSelectedDate(start);
@@ -113,11 +133,11 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
   const selectedDateEvents = useMemo(() => {
     if (!selectedDate) return [];
     const dateStr = selectedDate.toISOString().split("T")[0];
-    return mockCalendarEvents.filter((event) => {
-      const eventDateStr = event.date.toISOString().split("T")[0];
+    return calendarEvents.filter((event) => {
+      const eventDateStr = new Date(event.date).toISOString().split("T")[0];
       return eventDateStr === dateStr;
     });
-  }, [selectedDate]);
+  }, [selectedDate, calendarEvents]);
 
   // Custom event style
   const eventStyleGetter = (event: { resource?: CalendarEvent; [key: string]: unknown }) => {
@@ -343,14 +363,14 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-1.5 sm:space-y-2">
-                {mockCalendarEvents
+                {calendarEvents
                   .filter((event) => {
                     const eventDate = new Date(event.date);
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     return eventDate >= today;
                   })
-                  .sort((a, b) => a.date.getTime() - b.date.getTime())
+                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                   .slice(0, 5)
                   .map((event) => (
                     <div
@@ -372,13 +392,13 @@ export function CalendarView({ onDateSelect }: CalendarViewProps) {
                           {event.title}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">
-                          {format(event.date, "MMM d, yyyy", { locale: enUS })}
+                          {format(new Date(event.date), "MMM d, yyyy", { locale: enUS })}
                           {event.startTime && ` • ${event.startTime}`}
                         </p>
                       </div>
                     </div>
                   ))}
-                {mockCalendarEvents.filter((event) => {
+                {calendarEvents.filter((event) => {
                   const eventDate = new Date(event.date);
                   const today = new Date();
                   today.setHours(0, 0, 0, 0);

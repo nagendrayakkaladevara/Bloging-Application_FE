@@ -32,7 +32,6 @@ import { Button } from "@/components/ui/button";
 import type { BlogPreview } from "@/types/blog";
 import { Command } from "lucide-react";
 import { useFavorites } from "@/hooks/useFavorites";
-import { getBlogPreviewsByIds } from "@/data/mockBlogs";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   blogs: BlogPreview[];
@@ -43,11 +42,11 @@ export function AppSidebar({ blogs, ...props }: AppSidebarProps) {
   const { favorites: favoriteIds } = useFavorites();
   const { isMobile, setOpenMobile } = useSidebar();
 
-  // Get favorite blogs from localStorage
+  // Get favorite blogs from the blogs prop (API data)
   const favoriteBlogs = React.useMemo(() => {
-    if (favoriteIds.length === 0) return [];
-    return getBlogPreviewsByIds(favoriteIds);
-  }, [favoriteIds]);
+    if (favoriteIds.length === 0 || blogs.length === 0) return [];
+    return blogs.filter((blog) => favoriteIds.includes(blog.id));
+  }, [favoriteIds, blogs]);
 
   // Convert favorite blogs to favorites format
   const favorites = favoriteBlogs.map((blog) => ({

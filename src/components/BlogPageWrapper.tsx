@@ -1,18 +1,19 @@
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { BlogPage } from "@/pages/BlogPage";
-import { getBlogById } from "@/data/mockBlogs";
+import { useBlog } from "@/hooks/useBlog";
 import { AppSidebar } from "@/components/AppSidebar";
+import { BlogSkeleton } from "@/components/BlogSkeleton";
 import type { BlogPreview } from "@/types/blog";
 
 interface BlogPageWrapperProps {
-  onVote?: (blogId: string, vote: "upvote" | "downvote") => void;
   blogs: BlogPreview[];
+  onVote?: (blogId: string, vote: "upvote" | "downvote") => void;
 }
 
-export function BlogPageWrapper({ onVote, blogs }: BlogPageWrapperProps) {
+export function BlogPageWrapper({ blogs, onVote }: BlogPageWrapperProps) {
   const { blogId } = useParams<{ blogId: string }>();
-  const blog = blogId ? getBlogById(blogId) ?? null : null;
+  const { blog, loading, error } = useBlog(blogId);
 
   // Scroll to top when blogId changes
   useEffect(() => {
@@ -26,6 +27,29 @@ export function BlogPageWrapper({ onVote, blogs }: BlogPageWrapperProps) {
 
     return () => clearTimeout(timer);
   }, [blogId]);
+
+  if (loading) {
+    return (
+      <>
+        <AppSidebar blogs={blogs} />
+        <BlogSkeleton />
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <AppSidebar blogs={blogs} />
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-2">Error Loading Blog</h1>
+            <p className="text-muted-foreground mb-4">{error.message}</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
