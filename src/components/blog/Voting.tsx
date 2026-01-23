@@ -101,6 +101,19 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
     voting.enabled,
   ]);
 
+  // Memoize vote states to prevent unnecessary re-renders
+  const isUpvoted = useMemo(() => currentVoting.userVote === "upvote", [currentVoting.userVote]);
+  const isDownvoted = useMemo(() => currentVoting.userVote === "downvote", [currentVoting.userVote]);
+  const isDisabled = useMemo(() => loading || isProcessing || !currentVoting.enabled, [loading, isProcessing, currentVoting.enabled]);
+
+  // Show error state if there's an error
+  useEffect(() => {
+    if (error && !loading) {
+      // Error is already handled in handleVote, but we can add additional handling here if needed
+      console.error("Voting error:", error);
+    }
+  }, [error, loading]);
+
   // Don't render if voting is disabled or voting state is invalid
   if (!currentVoting.enabled || !currentVoting) {
     return null;
@@ -189,19 +202,6 @@ export function Voting({ voting, blogSlug, onVoteChange }: VotingProps) {
       }, 300);
     }
   };
-
-  // Memoize vote states to prevent unnecessary re-renders
-  const isUpvoted = useMemo(() => currentVoting.userVote === "upvote", [currentVoting.userVote]);
-  const isDownvoted = useMemo(() => currentVoting.userVote === "downvote", [currentVoting.userVote]);
-  const isDisabled = useMemo(() => loading || isProcessing || !currentVoting.enabled, [loading, isProcessing, currentVoting.enabled]);
-
-  // Show error state if there's an error
-  useEffect(() => {
-    if (error && !loading) {
-      // Error is already handled in handleVote, but we can add additional handling here if needed
-      console.error("Voting error:", error);
-    }
-  }, [error, loading]);
 
   return (
     <motion.div

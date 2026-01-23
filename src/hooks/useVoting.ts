@@ -186,12 +186,11 @@ export function useVoting(blogSlug: string | undefined, initialVoting?: BlogVoti
         });
         
         // Make API call with timeout
-        let result: VoteResult;
         const apiPromise = isSameVote 
           ? removeVote(blogSlug)
           : voteOnBlog(blogSlug, voteType);
         
-        result = await Promise.race([apiPromise, timeoutPromise]);
+        const result = await Promise.race([apiPromise, timeoutPromise]);
         
         // Only update if this is still the latest request
         if (currentRequestId === requestIdRef.current) {
