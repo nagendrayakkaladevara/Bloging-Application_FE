@@ -51,6 +51,23 @@ export function BlogPageWrapper({ blogs, onVote }: BlogPageWrapperProps) {
     );
   }
 
+  // Handle case where blog is null (not found) but no error was thrown
+  if (!blog) {
+    return (
+      <>
+        <AppSidebar blogs={blogs} />
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-2">Blog Not Found</h1>
+            <p className="text-muted-foreground mb-4">
+              The blog you're looking for doesn't exist.
+            </p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <AppSidebar blogs={blogs} />

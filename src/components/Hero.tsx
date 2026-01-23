@@ -68,7 +68,7 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.4 }}
         >
           Welcome to my blogging platform 
-          <br />{`<Sai Nagendra Yakkadevara />`}
+          <br />{`<Sai Nagendra Yakkaladevara />`}
         </motion.h1>
         <motion.p 
           className="mt-6 md:text-lg text-foreground/80"

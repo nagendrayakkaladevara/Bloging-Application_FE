@@ -255,7 +255,7 @@ export function useVoting(blogSlug: string | undefined, initialVoting?: BlogVoti
         }
       }
     },
-    [blogSlug, loading]
+    [blogSlug, loading, initialVoting]
   );
 
   const removeVoteAction = useCallback(async () => {
